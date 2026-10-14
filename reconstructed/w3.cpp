@@ -245,3 +245,206 @@ char *C::Get() { return f329 ? buf : 0; }
 extern "C" void *memset(void*,int,size_t);
 extern DWORD *g_pArr;
 void FUNC_100A7400(){ memset(g_pArr, 0, 0x60); }
+
+// ===== zone w3 batch 2 (verified byte-exact) =====
+// ---- a8110 ----
+#include "pre.h"
+struct VECTOR { float x, y, z; };
+struct CObject_A8 {
+	char _pad[0xbe];
+	volatile WORD m_wBE;
+	volatile WORD m_wC0;
+	VECTOR m_vC2;
+	VECTOR m_vCE;
+	BYTE m_byDA;
+	__declspec(noinline) void AttachVehicle(WORD w, VECTOR *po, VECTOR *pr);
+	__declspec(noinline) void AttachObject(WORD w, VECTOR *po, VECTOR *pr, BYTE b);
+};
+void CObject_A8::AttachVehicle(WORD w, VECTOR *po, VECTOR *pr)
+{
+	if (w == 0xffff) {
+		m_wBE = w;
+		m_vC2.x = 0; m_vC2.y = 0; m_vC2.z = 0;
+		m_vCE.x = 0; m_vCE.y = 0; m_vCE.z = 0;
+	} else {
+		m_wBE = w;
+		m_vC2.x = po->x; m_vC2.y = po->y; m_vC2.z = po->z;
+		m_vCE.x = pr->x; m_vCE.y = pr->y; m_vCE.z = pr->z;
+	}
+}
+void CObject_A8::AttachObject(WORD w, VECTOR *po, VECTOR *pr, BYTE b)
+{
+	if (w == 0xffff) {
+		m_wC0 = w;
+		m_vC2.x = 0; m_vC2.y = 0; m_vC2.z = 0;
+		m_vCE.x = 0; m_vCE.y = 0;
+		m_byDA = 1;
+		m_vCE.z = 0;
+	} else {
+		m_wC0 = w;
+		m_vC2.x = po->x; m_vC2.y = po->y; m_vC2.z = po->z;
+		m_vCE.x = pr->x; m_vCE.y = pr->y;
+		m_vCE.z = pr->z; m_byDA = b;
+	}
+}
+int __cdecl sub_next(){ return 0; }
+// ---- a81a0 ----
+// ---- a8240 ----
+#include "pre.h"
+struct VECTOR { float x, y, z; };
+extern int FUNC_100B2310(const char *fmt, ...);
+struct CObject_A82 {
+	char _pad[0x44];
+	DWORD m_dw44;
+	char _p48[0x7a];
+	VECTOR m_vC2;
+	VECTOR m_vCE;
+	__declspec(noinline) void FUNC_100A8240(CObject_A82 *pOther);
+};
+void CObject_A82::FUNC_100A8240(CObject_A82 *pOther)
+{
+	if (!FUNC_100B2310((const char *)0x100ecd2c, m_dw44)) {
+		FUNC_100B2310((const char *)0x100ecd18, m_dw44, pOther->m_dw44,
+			m_vC2.x, m_vC2.y, m_vC2.z, m_vCE.x, m_vCE.y, m_vCE.z);
+	}
+}
+int __cdecl sub_next(){ return 0; }
+// ---- a82c0 ----
+#include "pre.h"
+struct VECTOR { float x, y, z; };
+extern int FUNC_100B2310(const char *fmt, ...);
+struct CObject_A82 {
+	char _pad[0x44];
+	DWORD m_dw44;
+	char _p48[0x7a];
+	VECTOR m_vC2;
+	VECTOR m_vCE;
+	__declspec(noinline) void FUNC_100A82C0(CObject_A82 *pOther);
+};
+void CObject_A82::FUNC_100A82C0(CObject_A82 *pOther)
+{
+	if (!FUNC_100B2310((const char *)0x100ecd2c, m_dw44)) {
+		FUNC_100B2310((const char *)0x100ecd40, m_dw44, pOther->m_dw44,
+			m_vC2.x, m_vC2.y, m_vC2.z, m_vCE.x, m_vCE.y, m_vCE.z);
+	}
+}
+int __cdecl sub_next(){ return 0; }
+// ---- a9e30 ----
+#include "pre.h"
+struct CObject_A9 {
+	char _p[0x118b];
+	DWORD m_118B;
+	DWORD m_118F;
+	BYTE m_by1193;
+	__declspec(noinline) void FUNC_100A9E30();
+	void FUNC_100A8C00();
+	void FUNC_100A9040();
+};
+void CObject_A9::FUNC_100A9E30()
+{
+	if (m_118B && m_118F) {
+		FUNC_100A8C00();
+		if (m_by1193) FUNC_100A9040();
+	}
+	m_118F = 1;
+}
+int __cdecl sub_next(){ return 0; }
+// ---- a9e70 ----
+#include "pre.h"
+extern DWORD g_101A25F8;
+extern DWORD g_101A25FC;
+struct EntityA { char _p[4]; DWORD f4; };
+struct CObject_A9E {
+	char _p[0x1cb];
+	DWORD m_1CB;
+	DWORD m_1CF;
+	EntityA *m_1D3;
+	char _q[0xfb4];
+	DWORD m_118B;
+	DWORD m_118F;
+	BYTE m_by1193;
+	__declspec(noinline) void FUNC_100A9E70();
+	void FUNC_100A9080();
+	EntityA *FUNC_1009FA60();
+};
+extern void FUNC_100B14C0(void *a, void *b, void *c);
+void CObject_A9E::FUNC_100A9E70()
+{
+	EntityA *e;
+	if (m_118B) {
+		if (m_by1193) FUNC_100A9080();
+		g_101A25F8 = 0;
+		g_101A25FC = 0;
+		if (m_1CB || m_1CF) {
+			e = FUNC_1009FA60();
+			if (e && m_1D3 == e && e->f4)
+				FUNC_100B14C0((void*)e->f4, (void*)0x100a8b50, this);
+		}
+	}
+}
+int __cdecl sub_next(){ return 0; }
+// ---- a90d0 ----
+#include "pre.h"
+struct EntX {
+	BYTE b0;
+	char _1[7];
+	BYTE b8;
+	char _9[0xf];
+	EntX *f18;
+};
+struct EntA { DWORD vt; EntX *f4; };
+struct CObject_A90 {
+	char _p[0x40];
+	EntA *m_p40;
+	__declspec(noinline) BYTE FUNC_100A90D0();
+	EntA *FUNC_1009FA60();
+};
+BYTE CObject_A90::FUNC_100A90D0()
+{
+	EntA *a;
+	EntX *x;
+	if (m_p40 && m_p40->vt != 0x863c40 &&
+		(a = FUNC_1009FA60()) && (x = a->f4) &&
+		x->b0 == 1 && (x = x->f18) && (x->b8 & 8))
+		return 1;
+	return 0;
+}
+int __cdecl sub_next(){ return 0; }
+// ---- a8fa0 ----
+#include "pre.h"
+struct EntC { DWORD vt; char _p[0xe]; DWORD f12; };
+struct CObject_A8F {
+	char _p[0x40];
+	EntC *m_p40;
+	char _q[0xa];
+	DWORD m_dw4E;
+	__declspec(noinline) void FUNC_100A8FA0();
+};
+extern EntC *__stdcall FUNC_100A7A40(DWORD id);
+void CObject_A8F::FUNC_100A8FA0()
+{
+	EntC *e;
+	if (m_p40 && m_p40->vt != 0x863c40 &&
+		(e = FUNC_100A7A40(m_dw4E)) != 0)
+		e->f12 &= ~1;
+}
+int __cdecl sub_next(){ return 0; }
+// ---- a8f20 ----
+#include "pre.h"
+struct EntC { DWORD vt; DWORD f4; };
+struct CObject_A8F2 {
+	char _p[0x1c3];
+	DWORD m_1C3;
+	__declspec(noinline) void FUNC_100A8F20();
+	EntC *FUNC_1009FA60();
+};
+extern void FUNC_100B14C0(void *a, void *b, void *c);
+void CObject_A8F2::FUNC_100A8F20()
+{
+	EntC *e = FUNC_1009FA60();
+	if (e && !m_1C3 && (e = (EntC*)e->f4) != 0) {
+		FUNC_100B14C0(e, (void*)0x100a8f10, this);
+		m_1C3 = 1;
+	}
+}
+int __cdecl sub_next(){ return 0; }
