@@ -1,0 +1,247 @@
+// Reconstructed readable C++ for samp.dll 0.3.7 R5 - zone w3
+// Each function verified byte-exact against the DLL .text modulo COFF relocs.
+
+// ---- rva 0xa7970 ----
+// FUNC_100a7970 — verify opcode signatures then patch imm32 sites
+extern int iGtaVersion;                 // ?dword_1026EB28
+extern unsigned char abPatchTblUS[];    // ?dword_10114B10
+extern unsigned char abPatchTblEU[];    // ?dword_101158E0
+extern unsigned int dwHookValue;        // ?dword_10114B08
+extern int bScanDone;                   // ?dword_101A25AC
+extern void FUNC_100AA4C0(void *addr, int size);
+
+int __cdecl ScanAndPatch()
+{
+	int i;
+	unsigned char *addr;
+	unsigned char op;
+	unsigned char *tbl;
+	unsigned char *w;
+
+	i = 0;
+	do {
+		if (iGtaVersion == 1) {
+			addr = *(unsigned char **)(abPatchTblUS + i);
+			op = *(abPatchTblUS + i + 4);
+		} else {
+			addr = *(unsigned char **)(abPatchTblEU + i);
+			op = *(abPatchTblEU + i + 4);
+		}
+		if (op == *addr) {
+			if (op == 0x8b || op == 0x89 || op == 0x39) {
+				w = addr + 3;
+				FUNC_100AA4C0(w, 4);
+				*(unsigned int *)w = dwHookValue;
+			} else if (op == 0xbe || op == 0xbf) {
+				w = addr + 1;
+				FUNC_100AA4C0(w, 4);
+				*(unsigned int *)w = dwHookValue;
+			}
+		}
+		i += 5;
+	} while (i != 0xDCF);
+	bScanDone = 1;
+	return 1;
+}
+
+// ---- rva 0xa7a00 ----
+extern "C" void *memset(void *, int, size_t);
+extern "C" void *memcpy(void *, const void *, size_t);
+extern int adwModelInfoTable[];         // ?dword_101625B0 (65535 dwords)
+extern void *pHookTable;                // ?dword_10114B08
+extern void FUNC_100A6FF0();
+int __cdecl ScanAndPatch();             // FUNC_100A7970
+
+int __cdecl RelocateModelInfoTable()
+{
+	memset(adwModelInfoTable, 0, 0x3fffc);
+	memcpy(pHookTable, (void *)0xA9B0C8, 0x4e20*4);
+	ScanAndPatch();
+	FUNC_100A6FF0();
+	return 1;
+}
+
+// ---- rva 0xa7b30 ----
+extern "C" void free(void *);
+extern void **pHookTable;               // ?dword_10114B08
+
+void __cdecl FreeModelSlot(int i)
+{
+	void *p = pHookTable[i];
+	if (p) {
+		free(p);
+		pHookTable[i] = 0;
+	}
+}
+
+// ---- rva 0xa7cc0 ----
+extern "C" void free(void *);
+extern void *FUNC_100C6982(int a, unsigned int size);
+extern void FUNC_100B1E40(void *ctx, void *dst, unsigned int size);
+extern void *FUNC_100B6850();
+extern int  FUNC_100B6880(void *data, unsigned int size, void *obj);
+extern void __stdcall FUNC_100B4630(void *list, void *obj);
+extern void FUNC_100680F0(void *log, const char *fmt);
+extern void *g_pColList;
+extern void *g_pErrLog;
+extern const char szErrColMagic[];
+extern const char szErrColParse[];
+extern const char szErrColAlloc[];
+
+int __cdecl LoadCollisionModel(void *ctx, unsigned int size)
+{
+	void *buf, *obj;
+
+	if (size > 0x40000)
+		return 0;
+	buf = FUNC_100C6982(1, size);
+	FUNC_100B1E40(ctx, buf, size);
+	if (*(unsigned int *)buf != 0x334c4f43) {
+		if (g_pErrLog)
+			FUNC_100680F0(g_pErrLog, szErrColMagic);
+		free(buf);
+		return 0;
+	}
+	obj = FUNC_100B6850();
+	if (obj) {
+		if (FUNC_100B6880(buf, size, obj)) {
+			FUNC_100B4630(g_pColList, obj);
+			free(buf);
+			return 1;
+		}
+		if (g_pErrLog)
+			FUNC_100680F0(g_pErrLog, szErrColParse);
+	} else {
+		if (g_pErrLog)
+			FUNC_100680F0(g_pErrLog, szErrColAlloc);
+	}
+	free(buf);
+	return 0;
+}
+
+// ---- rva 0xa7d90 ----
+extern void FUNC_100B21A0(unsigned int id);
+extern void FUNC_100B2200(unsigned int id, void *pfn);
+extern int __cdecl LoadCollisionModel(void *ctx, unsigned int size);
+
+void __cdecl InstallCollisionLoader()
+{
+	FUNC_100B21A0(0x253f2ff);
+	FUNC_100B2200(0x253f2ff, (void *)LoadCollisionModel);
+}
+
+// ---- rva 0xa7e20 ----
+struct VECTOR { float x, y, z; };
+struct MATRIX4X4 {
+	VECTOR vA; DWORD u0;
+	VECTOR vB; DWORD u1;
+	VECTOR vC; DWORD u2;
+	DWORD f30, f34, f38, f3c;
+};
+extern MATRIX4X4 g_stAttach;
+extern VECTOR g_vShared;
+
+extern void FUNC_100B5790(MATRIX4X4 *st, int idx, DWORD val);
+
+struct CObject_A7E20 {
+	char _pad[0xC0];
+	WORD m_wC0;
+	char _c2[0x18];
+	BYTE m_byDA;
+	char _db[0x40];
+	VECTOR m_v11B; DWORD _x1;
+	VECTOR m_v12B; DWORD _x2;
+	VECTOR m_v13B;
+	void FUNC_1009EB10(MATRIX4X4 *st);
+	void FUNC_1009EBC0(MATRIX4X4 st);
+	void FUNC_1009EE60(VECTOR v);
+	void FUNC_1009ED10(VECTOR v);
+	void DoAttachMove();
+};
+void CObject_A7E20::DoAttachMove()
+{
+	if (m_wC0 == 0xffff || m_byDA) return;
+	FUNC_1009EB10(&g_stAttach);
+	g_stAttach.vA = m_v11B;
+	g_stAttach.vB = m_v12B;
+	g_stAttach.vC = m_v13B;
+	FUNC_100B5790(&g_stAttach, 0, *(DWORD*)((char*)this + 0xce));
+	FUNC_100B5790(&g_stAttach, 1, *(DWORD*)((char*)this + 0xd2));
+	FUNC_100B5790(&g_stAttach, 2, *(DWORD*)((char*)this + 0xd6));
+	FUNC_1009EBC0(g_stAttach);
+	FUNC_1009EE60(g_vShared);
+	FUNC_1009ED10(g_vShared);
+}
+
+// ---- rva 0xa0b80 ----
+void __stdcall FUNC_100A0B80(DWORD a){}
+
+// ---- rva 0xa3d60 ----
+void FUNC_100A3D60(){}
+
+// ---- rva 0xa5400 ----
+int FUNC_100A5400(){ return 2; }
+
+// ---- rva 0xa55f0 ----
+int FUNC_100A55F0(){ return 0; }
+
+// ---- rva 0xa23a0 ----
+struct C { char _p[4]; BYTE b4; __declspec(noinline) BYTE Get(); };
+BYTE C::Get() { return b4; }
+
+// ---- rva 0xa0fa0 ----
+extern const char c_a0fb5[],c_a0fbd[],c_a0fc5[],c_a0fcd[],c_a0fd5[],c_a0fdd[],c_a0fe5[],c_a0fed[];
+extern const char c_a0ff5[],c_a0ffd[],c_a1005[],c_a100d[],c_a1015[],c_a101d[],c_a1025[],c_a102d[];
+extern const char c_a1035[],c_a103d[],c_a1045[],c_a104d[],c_a1055[],c_a105d[],c_a1065[],c_a106d[];
+extern const char c_a1075[],c_a107d[],c_a1085[],c_a108d[],c_a1095[],c_a109d[],c_a10a5[],c_a10ad[];
+extern const char c_a10b5[],c_a10bd[],c_a10c5[],c_a10cd[],c_a10d5[],c_a10dd[],c_a10e5[],c_a10ed[];
+extern const char c_a10f5[],c_a10fd[],c_a1105[];
+const char *__stdcall FUNC_100A0FA0(int n)
+{
+	switch (n - 1) {
+	case 0: return c_a0fb5; case 1: return c_a0fbd; case 2: return c_a0fc5; case 3: return c_a0fcd;
+	case 4: return c_a0fd5; case 5: return c_a0fdd; case 6: return c_a0fe5; case 7: return c_a0fed;
+	case 8: return c_a0ff5; case 9: return c_a0ffd; case 10: return c_a1005; case 11: return c_a100d;
+	case 12: return c_a1015; case 13: return c_a101d; case 14: return c_a1025; case 15: return c_a102d;
+	case 19: return c_a1035; case 20: return c_a103d; case 21: return c_a1045; case 22: return c_a104d;
+	case 23: return c_a1055; case 24: return c_a105d; case 25: return c_a1065; case 26: return c_a106d;
+	case 27: return c_a1075; case 28: return c_a107d; case 29: return c_a1085; case 30: return c_a108d;
+	case 31: return c_a1095; case 32: return c_a109d; case 33: return c_a10a5; case 34: return c_a10ad;
+	case 35: return c_a10b5; case 36: return c_a10bd; case 37: return c_a10c5; case 38: return c_a10cd;
+	case 39: return c_a10d5; case 40: return c_a10dd; case 43: return c_a10e5;
+	case 16: case 17: case 18: case 41: case 42: case 44: case 45: case 47: case 48:
+	case 51: case 52: case 53: return c_a1105;
+	default: return c_a1105;
+	case 46: return c_a10ed; case 49: return c_a10f5; case 50: return c_a10fd;
+	}
+}
+
+// ---- rva 0xa8f10 ----
+DWORD __cdecl FUNC_100A8F10(DWORD a){ return a; }
+
+// ---- rva 0xadfc0 ----
+void __stdcall FUNC_100ADFC0(DWORD a, DWORD b, DWORD c){}
+
+// ---- rva 0xae0a0 ----
+struct C { char _p[0x48]; DWORD f48; __declspec(noinline) DWORD Get(); };
+DWORD C::Get() { return f48; }
+
+// ---- rva 0xace30 ----
+int __cdecl FUNC_100ACE30(){ return 0; }
+
+// ---- rva 0xa8000 ----
+extern float FUNC_100B48E0(float v);
+float __stdcall FUNC_100A8000(float a, float b)
+{
+	b = FUNC_100B48E0(b) - a;
+	return FUNC_100B48E0(b);
+}
+
+// ---- rva 0xaba50 ----
+struct C { char _p[0x2fd]; char buf[0x2c]; DWORD f329; __declspec(noinline) char *Get(); };
+char *C::Get() { return f329 ? buf : 0; }
+
+// ---- rva 0xa7400 ----
+extern "C" void *memset(void*,int,size_t);
+extern DWORD *g_pArr;
+void FUNC_100A7400(){ memset(g_pArr, 0, 0x60); }
