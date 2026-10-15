@@ -1,149 +1,11 @@
-// Reconstructed readable C++ for samp.dll 0.3.7 R5 - zone w3
-// Each function verified byte-exact against the DLL .text modulo COFF relocs.
+// w3.cpp — zone w3 VERIFIED byte-exact reconstructions
+// Each block was compiled under VC7.1 and byte-compared OK_LIGHT against samp.dll.
+#include "w3_shared.h"
 
-// ---- rva 0xa7970 ----
-// FUNC_100a7970 — verify opcode signatures then patch imm32 sites
-extern int iGtaVersion;                 // ?dword_1026EB28
-extern unsigned char abPatchTblUS[];    // ?dword_10114B10
-extern unsigned char abPatchTblEU[];    // ?dword_101158E0
-extern unsigned int dwHookValue;        // ?dword_10114B08
-extern int bScanDone;                   // ?dword_101A25AC
-extern void FUNC_100AA4C0(void *addr, int size);
 
-int __cdecl ScanAndPatch()
-{
-	int i;
-	unsigned char *addr;
-	unsigned char op;
-	unsigned char *tbl;
-	unsigned char *w;
+// ---- a7e20 (rva 0xa7e20) ----
 
-	i = 0;
-	do {
-		if (iGtaVersion == 1) {
-			addr = *(unsigned char **)(abPatchTblUS + i);
-			op = *(abPatchTblUS + i + 4);
-		} else {
-			addr = *(unsigned char **)(abPatchTblEU + i);
-			op = *(abPatchTblEU + i + 4);
-		}
-		if (op == *addr) {
-			if (op == 0x8b || op == 0x89 || op == 0x39) {
-				w = addr + 3;
-				FUNC_100AA4C0(w, 4);
-				*(unsigned int *)w = dwHookValue;
-			} else if (op == 0xbe || op == 0xbf) {
-				w = addr + 1;
-				FUNC_100AA4C0(w, 4);
-				*(unsigned int *)w = dwHookValue;
-			}
-		}
-		i += 5;
-	} while (i != 0xDCF);
-	bScanDone = 1;
-	return 1;
-}
 
-// ---- rva 0xa7a00 ----
-extern "C" void *memset(void *, int, size_t);
-extern "C" void *memcpy(void *, const void *, size_t);
-extern int adwModelInfoTable[];         // ?dword_101625B0 (65535 dwords)
-extern void *pHookTable;                // ?dword_10114B08
-extern void FUNC_100A6FF0();
-int __cdecl ScanAndPatch();             // FUNC_100A7970
-
-int __cdecl RelocateModelInfoTable()
-{
-	memset(adwModelInfoTable, 0, 0x3fffc);
-	memcpy(pHookTable, (void *)0xA9B0C8, 0x4e20*4);
-	ScanAndPatch();
-	FUNC_100A6FF0();
-	return 1;
-}
-
-// ---- rva 0xa7b30 ----
-extern "C" void free(void *);
-extern void **pHookTable;               // ?dword_10114B08
-
-void __cdecl FreeModelSlot(int i)
-{
-	void *p = pHookTable[i];
-	if (p) {
-		free(p);
-		pHookTable[i] = 0;
-	}
-}
-
-// ---- rva 0xa7cc0 ----
-extern "C" void free(void *);
-extern void *FUNC_100C6982(int a, unsigned int size);
-extern void FUNC_100B1E40(void *ctx, void *dst, unsigned int size);
-extern void *FUNC_100B6850();
-extern int  FUNC_100B6880(void *data, unsigned int size, void *obj);
-extern void __stdcall FUNC_100B4630(void *list, void *obj);
-extern void FUNC_100680F0(void *log, const char *fmt);
-extern void *g_pColList;
-extern void *g_pErrLog;
-extern const char szErrColMagic[];
-extern const char szErrColParse[];
-extern const char szErrColAlloc[];
-
-int __cdecl LoadCollisionModel(void *ctx, unsigned int size)
-{
-	void *buf, *obj;
-
-	if (size > 0x40000)
-		return 0;
-	buf = FUNC_100C6982(1, size);
-	FUNC_100B1E40(ctx, buf, size);
-	if (*(unsigned int *)buf != 0x334c4f43) {
-		if (g_pErrLog)
-			FUNC_100680F0(g_pErrLog, szErrColMagic);
-		free(buf);
-		return 0;
-	}
-	obj = FUNC_100B6850();
-	if (obj) {
-		if (FUNC_100B6880(buf, size, obj)) {
-			FUNC_100B4630(g_pColList, obj);
-			free(buf);
-			return 1;
-		}
-		if (g_pErrLog)
-			FUNC_100680F0(g_pErrLog, szErrColParse);
-	} else {
-		if (g_pErrLog)
-			FUNC_100680F0(g_pErrLog, szErrColAlloc);
-	}
-	free(buf);
-	return 0;
-}
-
-// ---- rva 0xa7d90 ----
-extern void FUNC_100B21A0(unsigned int id);
-extern void FUNC_100B2200(unsigned int id, void *pfn);
-extern int __cdecl LoadCollisionModel(void *ctx, unsigned int size);
-
-void __cdecl InstallCollisionLoader()
-{
-	FUNC_100B21A0(0x253f2ff);
-	FUNC_100B2200(0x253f2ff, (void *)LoadCollisionModel);
-}
-
-// ---- rva 0xa7e20 ----
-struct VECTOR { float x, y, z; };
-struct MATRIX4X4 {
-	VECTOR vA; DWORD u0;
-	VECTOR vB; DWORD u1;
-	VECTOR vC; DWORD u2;
-	DWORD f30, f34, f38, f3c;
-};
-extern MATRIX4X4 g_stAttach;
-extern VECTOR g_vShared;
-
-extern void FUNC_100B5790(MATRIX4X4 *st, int idx, DWORD val);
-
-struct CObject_A7E20 {
 	char _pad[0xC0];
 	WORD m_wC0;
 	char _c2[0x18];
@@ -172,24 +34,29 @@ void CObject_A7E20::DoAttachMove()
 	FUNC_1009EE60(g_vShared);
 	FUNC_1009ED10(g_vShared);
 }
+int __cdecl sub_next(){ return 0; }
 
-// ---- rva 0xa0b80 ----
+// ---- a0b80 (rva 0xa0b80) ----
 void __stdcall FUNC_100A0B80(DWORD a){}
+int __cdecl sub_next(){ return 0; }
 
-// ---- rva 0xa3d60 ----
+// ---- a3d60 (rva 0xa3d60) ----
 void FUNC_100A3D60(){}
+int __cdecl sub_next(){ return 0; }
 
-// ---- rva 0xa5400 ----
+// ---- a5400 (rva 0xa5400) ----
 int FUNC_100A5400(){ return 2; }
+int __cdecl sub_next(){ return 0; }
 
-// ---- rva 0xa55f0 ----
+// ---- a55f0 (rva 0xa55f0) ----
 int FUNC_100A55F0(){ return 0; }
+int __cdecl sub_next(){ return 0; }
 
-// ---- rva 0xa23a0 ----
-struct C { char _p[4]; BYTE b4; __declspec(noinline) BYTE Get(); };
+// ---- a23a0 (rva 0xa23a0) ----
 BYTE C::Get() { return b4; }
+int __cdecl sub_next(){ return 0; }
 
-// ---- rva 0xa0fa0 ----
+// ---- a0fa0 (rva 0xa0fa0) ----
 extern const char c_a0fb5[],c_a0fbd[],c_a0fc5[],c_a0fcd[],c_a0fd5[],c_a0fdd[],c_a0fe5[],c_a0fed[];
 extern const char c_a0ff5[],c_a0ffd[],c_a1005[],c_a100d[],c_a1015[],c_a101d[],c_a1025[],c_a102d[];
 extern const char c_a1035[],c_a103d[],c_a1045[],c_a104d[],c_a1055[],c_a105d[],c_a1065[],c_a106d[];
@@ -215,42 +82,72 @@ const char *__stdcall FUNC_100A0FA0(int n)
 	case 46: return c_a10ed; case 49: return c_a10f5; case 50: return c_a10fd;
 	}
 }
+int __cdecl sub_next(){ return 0; }
 
-// ---- rva 0xa8f10 ----
+// ---- 9e0be (rva 0x9e0be) ----
+int __cdecl sub_prev(){ return 0; }
+void FUNC_1009E0C0(){ g_flag50 = 0; }
+int __cdecl sub_next(){ return 0; }
+
+// ---- 85443 (rva 0x85443) ----
+int __cdecl sub_prev(){ return 0; }
+void __stdcall FUNC_10085450(DWORD a){}
+int __cdecl sub_next(){ return 0; }
+
+// ---- a8f10 (rva 0xa8f10) ----
 DWORD __cdecl FUNC_100A8F10(DWORD a){ return a; }
+int __cdecl sub_next(){ return 0; }
 
-// ---- rva 0xadfc0 ----
+// ---- adfc0 (rva 0xadfc0) ----
 void __stdcall FUNC_100ADFC0(DWORD a, DWORD b, DWORD c){}
+int __cdecl sub_next(){ return 0; }
 
-// ---- rva 0xae0a0 ----
-struct C { char _p[0x48]; DWORD f48; __declspec(noinline) DWORD Get(); };
+// ---- ae0a0 (rva 0xae0a0) ----
 DWORD C::Get() { return f48; }
+int __cdecl sub_next(){ return 0; }
 
-// ---- rva 0xace30 ----
+// ---- ace30 (rva 0xace30) ----
 int __cdecl FUNC_100ACE30(){ return 0; }
+int __cdecl sub_next(){ return 0; }
 
-// ---- rva 0xa8000 ----
-extern float FUNC_100B48E0(float v);
+// ---- 9637c (rva 0x9637c) ----
+int __cdecl sub_prev(){ return 0; }
+DWORD __stdcall FUNC_10096380(DWORD a, DWORD b, DWORD c)
+{
+	if (!a || b > 0x7fffffff) return 0x80070057;
+	return FUNC_100781C0(a, b, c);
+}
+int __cdecl sub_next(){ return 0; }
+
+// ---- a8000 (rva 0xa8000) ----
 float __stdcall FUNC_100A8000(float a, float b)
 {
 	b = FUNC_100B48E0(b) - a;
 	return FUNC_100B48E0(b);
 }
+int __cdecl sub_next(){ return 0; }
 
-// ---- rva 0xaba50 ----
-struct C { char _p[0x2fd]; char buf[0x2c]; DWORD f329; __declspec(noinline) char *Get(); };
+// ---- aba50 (rva 0xaba50) ----
 char *C::Get() { return f329 ? buf : 0; }
+int __cdecl sub_next(){ return 0; }
 
-// ---- rva 0xa7400 ----
-extern "C" void *memset(void*,int,size_t);
+// ---- a7400 (rva 0xa7400) ----
 extern DWORD *g_pArr;
 void FUNC_100A7400(){ memset(g_pArr, 0, 0x60); }
+int __cdecl sub_next(){ return 0; }
 
-// ===== zone w3 batch 2 (verified byte-exact) =====
-// ---- a8110 ----
-#include "pre.h"
-struct VECTOR { float x, y, z; };
-struct CObject_A8 {
+// ---- 871da (rva 0x871da) ----
+int __cdecl sub_prev(){ return 0; }
+void *C::Self() { return this; }
+int __cdecl sub_next(){ return 0; }
+
+// ---- 8436e (rva 0x8436e) ----
+int __cdecl sub_prev(){ return 0; }
+void *C::Self() { return this; }
+void *C::Self2() { return this; }
+int __cdecl sub_next(){ return 0; }
+
+// ---- a8110 (rva 0xa8110) ----
 	char _pad[0xbe];
 	volatile WORD m_wBE;
 	volatile WORD m_wC0;
@@ -288,12 +185,8 @@ void CObject_A8::AttachObject(WORD w, VECTOR *po, VECTOR *pr, BYTE b)
 	}
 }
 int __cdecl sub_next(){ return 0; }
-// ---- a81a0 ----
-// ---- a8240 ----
-#include "pre.h"
-struct VECTOR { float x, y, z; };
-extern int FUNC_100B2310(const char *fmt, ...);
-struct CObject_A82 {
+
+// ---- a8240 (rva 0xa8240) ----
 	char _pad[0x44];
 	DWORD m_dw44;
 	char _p48[0x7a];
@@ -309,11 +202,8 @@ void CObject_A82::FUNC_100A8240(CObject_A82 *pOther)
 	}
 }
 int __cdecl sub_next(){ return 0; }
-// ---- a82c0 ----
-#include "pre.h"
-struct VECTOR { float x, y, z; };
-extern int FUNC_100B2310(const char *fmt, ...);
-struct CObject_A82 {
+
+// ---- a82c0 (rva 0xa82c0) ----
 	char _pad[0x44];
 	DWORD m_dw44;
 	char _p48[0x7a];
@@ -329,9 +219,8 @@ void CObject_A82::FUNC_100A82C0(CObject_A82 *pOther)
 	}
 }
 int __cdecl sub_next(){ return 0; }
-// ---- a9e30 ----
-#include "pre.h"
-struct CObject_A9 {
+
+// ---- a9e30 (rva 0xa9e30) ----
 	char _p[0x118b];
 	DWORD m_118B;
 	DWORD m_118F;
@@ -349,12 +238,8 @@ void CObject_A9::FUNC_100A9E30()
 	m_118F = 1;
 }
 int __cdecl sub_next(){ return 0; }
-// ---- a9e70 ----
-#include "pre.h"
-extern DWORD g_101A25F8;
-extern DWORD g_101A25FC;
-struct EntityA { char _p[4]; DWORD f4; };
-struct CObject_A9E {
+
+// ---- a9e70 (rva 0xa9e70) ----
 	char _p[0x1cb];
 	DWORD m_1CB;
 	DWORD m_1CF;
@@ -367,7 +252,6 @@ struct CObject_A9E {
 	void FUNC_100A9080();
 	EntityA *FUNC_1009FA60();
 };
-extern void FUNC_100B14C0(void *a, void *b, void *c);
 void CObject_A9E::FUNC_100A9E70()
 {
 	EntityA *e;
@@ -383,17 +267,8 @@ void CObject_A9E::FUNC_100A9E70()
 	}
 }
 int __cdecl sub_next(){ return 0; }
-// ---- a90d0 ----
-#include "pre.h"
-struct EntX {
-	BYTE b0;
-	char _1[7];
-	BYTE b8;
-	char _9[0xf];
-	EntX *f18;
-};
-struct EntA { DWORD vt; EntX *f4; };
-struct CObject_A90 {
+
+// ---- a90d0 (rva 0xa90d0) ----
 	char _p[0x40];
 	EntA *m_p40;
 	__declspec(noinline) BYTE FUNC_100A90D0();
@@ -410,17 +285,14 @@ BYTE CObject_A90::FUNC_100A90D0()
 	return 0;
 }
 int __cdecl sub_next(){ return 0; }
-// ---- a8fa0 ----
-#include "pre.h"
-struct EntC { DWORD vt; char _p[0xe]; DWORD f12; };
-struct CObject_A8F {
+
+// ---- a8fa0 (rva 0xa8fa0) ----
 	char _p[0x40];
 	EntC *m_p40;
 	char _q[0xa];
 	DWORD m_dw4E;
 	__declspec(noinline) void FUNC_100A8FA0();
 };
-extern EntC *__stdcall FUNC_100A7A40(DWORD id);
 void CObject_A8F::FUNC_100A8FA0()
 {
 	EntC *e;
@@ -429,16 +301,13 @@ void CObject_A8F::FUNC_100A8FA0()
 		e->f12 &= ~1;
 }
 int __cdecl sub_next(){ return 0; }
-// ---- a8f20 ----
-#include "pre.h"
-struct EntC { DWORD vt; DWORD f4; };
-struct CObject_A8F2 {
+
+// ---- a8f20 (rva 0xa8f20) ----
 	char _p[0x1c3];
 	DWORD m_1C3;
 	__declspec(noinline) void FUNC_100A8F20();
 	EntC *FUNC_1009FA60();
 };
-extern void FUNC_100B14C0(void *a, void *b, void *c);
 void CObject_A8F2::FUNC_100A8F20()
 {
 	EntC *e = FUNC_1009FA60();
@@ -446,5 +315,154 @@ void CObject_A8F2::FUNC_100A8F20()
 		FUNC_100B14C0(e, (void*)0x100a8f10, this);
 		m_1C3 = 1;
 	}
+}
+int __cdecl sub_next(){ return 0; }
+
+// ---- a18a0 (rva 0xa18a0) ----
+void FUNC_100A18A0()
+{
+	if (!FUNC_100B2310((const char*)0x100ec6fc, (const char*)0x100ec9ec))
+		FUNC_100B2310((const char*)0x100ec6e8, (const char*)0x100ec9ec);
+	if (!FUNC_100B2310((const char*)0x100ec6fc, (const char*)0x100ec9e8))
+		FUNC_100B2310((const char*)0x100ec6e8, (const char*)0x100ec9e8);
+	if (!FUNC_100B2310((const char*)0x100ec6fc, (const char*)0x100ec9e0))
+		FUNC_100B2310((const char*)0x100ec6e8, (const char*)0x100ec9e0);
+	if (!FUNC_100B2310((const char*)0x100ec6fc, (const char*)0x100ec9d4))
+		FUNC_100B2310((const char*)0x100ec6e8, (const char*)0x100ec9d4);
+	if (!FUNC_100B2310((const char*)0x100ec6fc, (const char*)0x100e6194))
+		FUNC_100B2310((const char*)0x100ec6e8, (const char*)0x100e6194);
+	if (!FUNC_100B2310((const char*)0x100ec6fc, (const char*)0x100ec9cc))
+		FUNC_100B2310((const char*)0x100ec6e8, (const char*)0x100ec9cc);
+	if (!FUNC_100B2310((const char*)0x100ec6fc, (const char*)0x100ec9c4))
+		FUNC_100B2310((const char*)0x100ec6e8, (const char*)0x100ec9c4);
+	if (!FUNC_100B2310((const char*)0x100ec6fc, (const char*)0x100ec9bc))
+		FUNC_100B2310((const char*)0x100ec6e8, (const char*)0x100ec9bc);
+	if (!FUNC_100B2310((const char*)0x100ec6fc, (const char*)0x100ec9b4))
+		FUNC_100B2310((const char*)0x100ec6e8, (const char*)0x100ec9b4);
+	if (!FUNC_100B2310((const char*)0x100ec5a8, (const char*)0xc3b))
+		FUNC_100B2310((const char*)0x100ec56c, (const char*)0xc3b);
+	if (!FUNC_100B2310((const char*)0x100ec5a8, (const char*)0x5cd))
+		FUNC_100B2310((const char*)0x100ec56c, (const char*)0x5cd);
+	if (!FUNC_100B2310((const char*)0x100ec5a8, (const char*)0x5ce))
+		FUNC_100B2310((const char*)0x100ec56c, (const char*)0x5ce);
+	if (!FUNC_100B2310((const char*)0x100ec5a8, (const char*)0x607))
+		FUNC_100B2310((const char*)0x100ec56c, (const char*)0x607);
+	if (!FUNC_100B2310((const char*)0x100ec5a8, (const char*)0x60a))
+		FUNC_100B2310((const char*)0x100ec56c, (const char*)0x60a);
+	if (!FUNC_100B2310((const char*)0x100ec5a8, (const char*)0x157))
+		FUNC_100B2310((const char*)0x100ec56c, (const char*)0x157);
+	if (!FUNC_100B2310((const char*)0x100ec5a8, (const char*)0x156))
+		FUNC_100B2310((const char*)0x100ec56c, (const char*)0x156);
+	if (!FUNC_100B2310((const char*)0x100ec5a8, (const char*)0x158))
+		FUNC_100B2310((const char*)0x100ec56c, (const char*)0x158);
+	if (!FUNC_100B2310((const char*)0x100ec5a8, (const char*)0x14a))
+		FUNC_100B2310((const char*)0x100ec56c, (const char*)0x14a);
+}
+int __cdecl sub_next(){ return 0; }
+
+// ---- a7970 (rva 0xa7970) ----
+// FUNC_100a7970 — verify opcode signatures then patch imm32 sites
+
+int __cdecl ScanAndPatch()
+{
+	int i;
+	unsigned char *addr;
+	unsigned char op;
+	unsigned char *tbl;
+	unsigned char *w;
+
+	i = 0;
+	do {
+		if (iGtaVersion == 1) {
+			addr = *(unsigned char **)(abPatchTblUS + i);
+			op = *(abPatchTblUS + i + 4);
+		} else {
+			addr = *(unsigned char **)(abPatchTblEU + i);
+			op = *(abPatchTblEU + i + 4);
+		}
+		if (op == *addr) {
+			if (op == 0x8b || op == 0x89 || op == 0x39) {
+				w = addr + 3;
+				FUNC_100AA4C0(w, 4);
+				*(unsigned int *)w = dwHookValue;
+			} else if (op == 0xbe || op == 0xbf) {
+				w = addr + 1;
+				FUNC_100AA4C0(w, 4);
+				*(unsigned int *)w = dwHookValue;
+			}
+		}
+		i += 5;
+	} while (i != 0xDCF);
+	bScanDone = 1;
+	return 1;
+}
+
+int __cdecl sub_100A7A00(){ return 0; }
+
+// ---- a7a00 (rva 0xa7a00) ----
+int __cdecl ScanAndPatch();             // FUNC_100A7970
+
+int __cdecl RelocateModelInfoTable()
+{
+	memset(adwModelInfoTable, 0, 0x3fffc);
+	memcpy(pHookTable, (void *)0xA9B0C8, 0x4e20*4);
+	ScanAndPatch();
+	FUNC_100A6FF0();
+	return 1;
+}
+int __cdecl sub_next(){ return 0; }
+
+// ---- a7b30 (rva 0xa7b30) ----
+
+void __cdecl FreeModelSlot(int i)
+{
+	void *p = pHookTable[i];
+	if (p) {
+		free(p);
+		pHookTable[i] = 0;
+	}
+}
+int __cdecl sub_next(){ return 0; }
+
+// ---- a7cc0 (rva 0xa7cc0) ----
+
+int __cdecl LoadCollisionModel(void *ctx, unsigned int size)
+{
+	void *buf, *obj;
+
+	if (size > 0x40000)
+		return 0;
+	buf = FUNC_100C6982(1, size);
+	FUNC_100B1E40(ctx, buf, size);
+	if (*(unsigned int *)buf != 0x334c4f43) {
+		if (g_pErrLog)
+			FUNC_100680F0(g_pErrLog, szErrColMagic);
+		free(buf);
+		return 0;
+	}
+	obj = FUNC_100B6850();
+	if (obj) {
+		if (FUNC_100B6880(buf, size, obj)) {
+			FUNC_100B4630(g_pColList, obj);
+			free(buf);
+			return 1;
+		}
+		if (g_pErrLog)
+			FUNC_100680F0(g_pErrLog, szErrColParse);
+	} else {
+		if (g_pErrLog)
+			FUNC_100680F0(g_pErrLog, szErrColAlloc);
+	}
+	free(buf);
+	return 0;
+}
+int __cdecl sub_next(){ return 0; }
+
+// ---- a7d90 (rva 0xa7d90) ----
+
+void __cdecl InstallCollisionLoader()
+{
+	FUNC_100B21A0(0x253f2ff);
+	FUNC_100B2200(0x253f2ff, (void *)LoadCollisionModel);
 }
 int __cdecl sub_next(){ return 0; }

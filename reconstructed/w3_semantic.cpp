@@ -1,13 +1,10 @@
-// Zone w3 semantic twins — readable C++, correct semantics, NOT byte-verified.
-// Each function emits functionally equivalent code but differs in MSVC
-// scheduling/block-order (documented per function).
+// w3_semantic.cpp — zone w3 semantic twins: readable C++, correct semantics,
+// NOT byte-verified (reason noted in each header comment).
+#include "w3_shared.h"
 
-// ---- a84c0 ----
+
+// ---- a84c0 (rva 0xa84c0) ----
 // semantic twin: MSVC folds flag-check+return-1 differently (jne+shared tail vs je+mid-block). 4 byte-order diffs.
-#include "pre.h"
-struct PoolA { char _p[0x3de]; DWORD *f3DE; };
-extern DWORD g_pPool;
-struct CObject_A84 {
 	char _pad[0xbe];
 	WORD m_wBE;
 	WORD m_wC0;
@@ -35,21 +32,8 @@ int CObject_A84::FUNC_100A84C0()
 }
 int __cdecl sub_next(){ return 0; }
 
-// ---- a8530 ----
+// ---- a8530 (rva 0xa8530) ----
 // semantic twin: regalloc differs (ebp=this vs esi=this) though control flow matches.
-#include "pre.h"
-extern "C" void __stdcall Sleep(DWORD ms);
-extern int FUNC_100B4570(int id);
-extern void FUNC_100B3960(void *p);
-extern void FUNC_100B2B90(const char*, const char*, int);
-extern int FUNC_100B2C60(const char*, const char*);
-extern int FUNC_100A0970(int id);
-extern void FUNC_100A0940(int id, int n);
-extern void FUNC_100A0960();
-extern void FUNC_100A09A0(int id, int n);
-extern short FUNC_100B4700(int id);
-extern int g_blankTex;
-struct CObject_A85 {
 	char _p[0x110b];
 	DWORD f110B[0x11];
 	char _q[0x11*4];
@@ -104,13 +88,8 @@ done:
 }
 int __cdecl sub_next(){ return 0; }
 
-// ---- a8340 ----
+// ---- a8340 (rva 0xa8340) ----
 // semantic twin: control flow matches; MSVC spills arg0 to [ebp+8] in original, differs in prologue/scheduling.
-#include "pre.h"
-extern float g_fScale;
-struct Entity;
-typedef void (Entity::*PFN_A8340)(DWORD,float,float,float,float,float,float);
-struct CObject_A83 {
 	char _p[0x40];
 	Entity *m_p40;
 	__declspec(noinline) void FUNC_100A8340(DWORD a0, float *v1, float *v2);
@@ -131,12 +110,8 @@ void CObject_A83::FUNC_100A8340(DWORD a0, float *v1, float *v2)
 }
 int __cdecl sub_next(){ return 0; }
 
-// ---- a83c0 ----
+// ---- a83c0 (rva 0xa83c0) ----
 // semantic twin: euler->matrix math correct; MSVC FPU stack scheduling differs.
-#include "pre.h"
-#include <math.h>
-extern float g_fRad;
-struct CObject_A83C {
 	char _p[0xad];
 	float m_fAD, m_fB1, m_fB5;
 	char _q[0x26];
@@ -169,13 +144,8 @@ void CObject_A83C::FUNC_100A83C0(float x, float y, float z)
 }
 int __cdecl sub_next(){ return 0; }
 
-// ---- a9080 ----
+// ---- a9080 (rva 0xa9080) ----
 // semantic twin: matches control flow; original uses ebp-frame spill of thiscall callee regs MSVC won't reproduce.
-#include "pre.h"
-struct EntB;
-typedef void (EntB::*VFN_A9080)(int);
-struct EntB { DWORD vt; };
-struct CObject_A908 {
 	char _p[0x40];
 	EntB *m_p40;
 	char _q[0x1150];
@@ -194,13 +164,8 @@ void CObject_A908::FUNC_100A9080()
 }
 int __cdecl sub_next(){ return 0; }
 
-// ---- a9040 ----
+// ---- a9040 (rva 0xa9040) ----
 // semantic twin: same as a9080 frame quirk; sets entity flag then calls vt[0x4c].
-#include "pre.h"
-struct EntB;
-typedef void (EntB::*VFN_A9040)();
-struct EntB { DWORD vt; char _p[0x18]; DWORD f1C; };
-struct CObject_A904 {
 	char _p[0x40];
 	EntB *m_p40;
 	char _q[0x1150];
@@ -220,19 +185,8 @@ void CObject_A904::FUNC_100A9040()
 }
 int __cdecl sub_next(){ return 0; }
 
-// ---- a8f60 ----
-
-// ---- a4950 ----
-
-// ---- a7f50 ----
+// ---- a7f50 (rva 0xa7f50) ----
 // semantic twin: circular range check; MSVC emits shared xor-al tail in original, mine splits it.
-#include "pre.h"
-struct PoolB;
-extern PoolB *g_pPoolB;
-struct PoolB {
-	void FUNC_100A0AE0(BYTE *a, BYTE *b);
-};
-struct CObject_A7F {
 	char _p[0x1199];
 	BYTE m_by1199;
 	BYTE m_by119A;
@@ -261,9 +215,8 @@ BYTE CObject_A7F::FUNC_100A7F50(int a0)
 }
 int __cdecl sub_next(){ return 0; }
 
-// ---- 845e0 ----
+// ---- 845e0 (rva 0x845e0) ----
 // semantic twin: same loop semantics; MSVC schedules arg0 load before push, original after.
-#include "pre.h"
 DWORD __stdcall FUNC_100845E0(WORD *s, int n, DWORD *out)
 {
 	int rem = n;
@@ -278,3 +231,195 @@ DWORD __stdcall FUNC_100845E0(WORD *s, int n, DWORD *out)
 	return 0x80070057;
 }
 int __cdecl sub_next(){ return 0; }
+
+// ---- a1610 (rva 0xa1610) ----
+// semantic twin: bubble-sort+alloc loop; 2 scheduling diffs (inc placement, folded for-test).
+	char _p[0x6e];
+	BYTE m_by6E[0xd4];
+	__declspec(noinline) void FUNC_100A1610(BYTE *arr);
+};
+void ObjA1610::FUNC_100A1610(BYTE *arr)
+{
+	int i, j, t, idx, *pi;
+	BYTE bt, *q;
+	int local_350[212];
+	memset(m_by6E, 0, 0xd4);
+	i = 400;
+	do {
+		if (i >= 0) {
+			if (i < 20000 && FUNC_100B2310((const char*)0x100ec5a8, i))
+				FUNC_100B2310((const char*)0x100ec6ac, i);
+		} else if (g_pNet && g_pNet->FUNC_1000D150(i) && !FUNC_100B3D30(i)) {
+			g_pNet->FUNC_1000D1D0(i);
+		}
+	} while (++i != 0x264);
+	i = 0;
+	do { local_350[i] = i + 400; } while (++i != 0xd4);
+	for (i = 0xd3; i > 0; i--) {
+		q = arr + 1;
+		pi = local_350 + 1;
+		j = i;
+		do {
+			if (*q > q[-1]) {
+				t = pi[-1];
+				bt = q[-1];
+				q[-1] = *q;
+				pi[-1] = pi[0];
+				*q = bt;
+				pi[0] = t;
+			}
+			pi++;
+			j--;
+			q++;
+		} while (j);
+	}
+	i = 0;
+	do {
+		if (arr[i]) {
+			idx = local_350[i];
+			FUNC_100B2310((const char*)0x100ec56c, idx);
+			FUNC_100B2310((const char*)0x100ec580);
+			*(BYTE*)(idx - 0x122 + (DWORD)this) = 1;
+		}
+	} while (++i != 0x50);
+}
+int __cdecl sub_next(){ return 0; }
+
+// ---- a1c10 (rva 0xa1c10) ----
+// semantic twin: frame-limit logic correct; x87 store interleaving differs (kept semantic per w4 tip).
+	char _p[0x5d];
+	DWORD m_5D;
+	__declspec(noinline) void FUNC_100A1C10();
+	void FUNC_100A0010();
+	int FUNC_10001010();
+	int FUNC_100ACCD0();
+	void FUNC_100A0090(int a, int b);
+};
+void ObjA1C::FUNC_100A1C10()
+{
+	int t, n2, lim;
+	t = FUNC_1002E7F0();
+	if (!g_10150694) {
+		*(float*)0xb7cb5c = 1.0f;
+		*(float*)0xb7cb58 = 1.0f;
+		*(float*)0x10116718 = 3.0f;
+		g_10150694 = FUNC_1002E7F0();
+		g_10150698 = g_10150694;
+		return;
+	}
+	FUNC_100A0010();
+	g_10150690++;
+	if (t - g_10150694 > 0xfa) {
+		float x;
+		n2 = g_10150690 * 4 - 4;
+		if (n2 > 0x10)
+			x = g_100EA63C / (float)n2;
+		else
+			x = g_100E6148;
+		g_1015069C = x;
+		*(float*)0xb7cb5c = x;
+		*(float*)0xb7cb58 = x;
+		*(float*)0x10116718 = x * g_100E6148;
+		g_10150694 = FUNC_1002E7F0();
+		g_10150690 = 0;
+	}
+	if (FUNC_10001010() && FUNC_10001010() && FUNC_100ACCD0()) {
+		if (g_00BA6794 && m_5D < 0x2e) {
+			FUNC_100A0090(t - g_10150698, m_5D);
+			g_10150698 = FUNC_1002E7F0();
+			return;
+		}
+		t -= g_10150698;
+		if (t && t < 0x16) {
+			Sleep(0x15 - t);
+			g_10150698 = FUNC_1002E7F0();
+			return;
+		}
+	} else if (!g_00BA6794) {
+		t -= g_10150698;
+		if (t && t < 0xb) Sleep(10 - t);
+	} else {
+		t -= g_10150698;
+		if (t && m_5D && t < (lim = 1000 / (int)m_5D)) {
+			Sleep(lim - t - 1);
+			g_10150698 = FUNC_1002E7F0();
+			return;
+		}
+	}
+	g_10150698 = FUNC_1002E7F0();
+}
+int __cdecl sub_next(){ return 0; }
+
+// ---- a0110 (rva 0xa0110) ----
+// semantic twin: allocates CObject-ish at first free slot 2..0xd1.
+// Original wraps operator_new+ctor in an SEH try block (fs:[0] frame, local_4 EH state)
+// which this simplified form does not reproduce byte-wise.
+void *operator_new(size_t n);
+ObjA *FUNC_100A0110(DWORD a, DWORD b, DWORD c, DWORD d, DWORD e, DWORD f, int p7)
+{
+	ObjA *o;
+	BYTE i;
+	for (i = 2; i != 0xd2; i++) {
+		if (g_SlotUsed[i] != 1) {
+			if ((char)i == 0) return 0;
+			o = 0;
+			{ void *pv = operator_new(0x32d);
+			  if (pv) o = (ObjA*)FUNC_100B0CE0(i, a, b, c, d, e); }
+			if (o && o->f2A4) {
+				g_SlotUsed[i] = 1;
+				FUNC_100B44C0(i, p7 != 0);
+			}
+			return o;
+		}
+	}
+	return 0;
+}
+
+// ---- a18a0 (rva 0xa18a0) ----
+void FUNC_100A18A0()
+{
+	if (!FUNC_100B2310((const char*)0x100ec6fc, (const char*)0x100ec9ec))
+		FUNC_100B2310((const char*)0x100ec6e8, (const char*)0x100ec9ec);
+	if (!FUNC_100B2310((const char*)0x100ec6fc, (const char*)0x100ec9e8))
+		FUNC_100B2310((const char*)0x100ec6e8, (const char*)0x100ec9e8);
+	if (!FUNC_100B2310((const char*)0x100ec6fc, (const char*)0x100ec9e0))
+		FUNC_100B2310((const char*)0x100ec6e8, (const char*)0x100ec9e0);
+	if (!FUNC_100B2310((const char*)0x100ec6fc, (const char*)0x100ec9d4))
+		FUNC_100B2310((const char*)0x100ec6e8, (const char*)0x100ec9d4);
+	if (!FUNC_100B2310((const char*)0x100ec6fc, (const char*)0x100e6194))
+		FUNC_100B2310((const char*)0x100ec6e8, (const char*)0x100e6194);
+	if (!FUNC_100B2310((const char*)0x100ec6fc, (const char*)0x100ec9cc))
+		FUNC_100B2310((const char*)0x100ec6e8, (const char*)0x100ec9cc);
+	if (!FUNC_100B2310((const char*)0x100ec6fc, (const char*)0x100ec9c4))
+		FUNC_100B2310((const char*)0x100ec6e8, (const char*)0x100ec9c4);
+	if (!FUNC_100B2310((const char*)0x100ec6fc, (const char*)0x100ec9bc))
+		FUNC_100B2310((const char*)0x100ec6e8, (const char*)0x100ec9bc);
+	if (!FUNC_100B2310((const char*)0x100ec6fc, (const char*)0x100ec9b4))
+		FUNC_100B2310((const char*)0x100ec6e8, (const char*)0x100ec9b4);
+	if (!FUNC_100B2310((const char*)0x100ec5a8, (const char*)0xc3b))
+		FUNC_100B2310((const char*)0x100ec56c, (const char*)0xc3b);
+	if (!FUNC_100B2310((const char*)0x100ec5a8, (const char*)0x5cd))
+		FUNC_100B2310((const char*)0x100ec56c, (const char*)0x5cd);
+	if (!FUNC_100B2310((const char*)0x100ec5a8, (const char*)0x5ce))
+		FUNC_100B2310((const char*)0x100ec56c, (const char*)0x5ce);
+	if (!FUNC_100B2310((const char*)0x100ec5a8, (const char*)0x607))
+		FUNC_100B2310((const char*)0x100ec56c, (const char*)0x607);
+	if (!FUNC_100B2310((const char*)0x100ec5a8, (const char*)0x60a))
+		FUNC_100B2310((const char*)0x100ec56c, (const char*)0x60a);
+	if (!FUNC_100B2310((const char*)0x100ec5a8, (const char*)0x157))
+		FUNC_100B2310((const char*)0x100ec56c, (const char*)0x157);
+	if (!FUNC_100B2310((const char*)0x100ec5a8, (const char*)0x156))
+		FUNC_100B2310((const char*)0x100ec56c, (const char*)0x156);
+	if (!FUNC_100B2310((const char*)0x100ec5a8, (const char*)0x158))
+		FUNC_100B2310((const char*)0x100ec56c, (const char*)0x158);
+	if (!FUNC_100B2310((const char*)0x100ec5a8, (const char*)0x14a))
+		FUNC_100B2310((const char*)0x100ec56c, (const char*)0x14a);
+}
+int __cdecl sub_next(){ return 0; }
+
+// ---- gta_thunks (rva 0xgta_thunks) ----
+// semantic twins: GTA SA inline-hook thunks — jump into fixed GTA code addresses;
+// not expressible as normal C++ control flow (documented, kept as MASM).
+// a3fc0: cmp [esi-0x20],0x27 -> jmp 0x738880/0x7388db   (GTA interior hook)
+// a3ff0: ecx!=0 ? jmp edx(*[esp+8] -> 0x63a047) : jmp 0x63a04d
+// a4010: eax!=0 ? jmp 0x47eab8 : jmp 0x47eaca
