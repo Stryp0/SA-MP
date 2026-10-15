@@ -65,6 +65,7 @@ extern float g_100E6148;
 extern float g_100EA63C;
 extern MATRIX4X4 g_stAttach;   // 0x101a25b8
 extern VECTOR g_vShared;
+extern void **pHookTable;     // ?dword_10114B08
 
 // CRT / Win32
 extern "C" void *memset(void *, int, size_t);
