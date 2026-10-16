@@ -90,7 +90,7 @@ extern int FUNC_100B4570(int id);
 extern void FUNC_100B3960(void *p);
 extern void FUNC_100B2B90(const char *, const char *, int);
 extern int FUNC_100B2C60(const char *, const char *);
-extern short FUNC_100B4700(int id);
+extern short __stdcall FUNC_100B4700(int id);
 extern char FUNC_100B3D30(int);
 extern float FUNC_100B48E0(float v);
 extern int FUNC_100B0CE0(int slot, DWORD a, DWORD b, DWORD c, DWORD d, DWORD e);

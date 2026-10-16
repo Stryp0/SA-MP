@@ -459,4 +459,120 @@ void __cdecl InstallCollisionLoader()
 {
 	FUNC_100B21A0(0x253f2ff);
 	FUNC_100B2200(0x253f2ff, (void *)LoadCollisionModel);
+}// ---- aa540 (rva 0xaa540) ----
+void FUNC_100AA540()
+{
+	BYTE v = 3;
+	*(BYTE *)0x71a223 = v;
+	*(BYTE *)0x71a5d5 = v;
+	*(BYTE *)0x71a247 = v;
+	*(BYTE *)0x71a282 = v;
+	*(BYTE *)0x71a26a = v;
+	*(BYTE *)0x71a2e5 = v;
+	*(BYTE *)0x71a3ac = v;
+	*(BYTE *)0x71a4b9 = v;
+	*(BYTE *)0x71a53c = v;
+	*(BYTE *)0x71a37f = v;
+	*(BYTE *)0x71a518 = v;
+	*(BYTE *)0x71a525 = v;
+	*(BYTE *)0x71a54b = v;
+	*(BYTE *)0x71a5b6 = v;
+	*(BYTE *)0x71a3bb = v;
 }
+
+// ---- a8c80 (rva 0xa8c80) ----
+BYTE __stdcall FUNC_100A8C80(DWORD code, DWORD *w0, DWORD *w1)
+{
+	switch (code) {
+	case 0xa:  *w0 = 0x20;  *w1 = 0x20;  return 1;
+	case 0x14: *w0 = 0x40;  *w1 = 0x20;  return 1;
+	case 0x1e: *w0 = 0x40;  *w1 = 0x40;  return 1;
+	case 0x28: *w0 = 0x80;  *w1 = 0x20;  return 1;
+	case 0x32: *w0 = 0x80;  *w1 = 0x40;  return 1;
+	case 0x3c: *w0 = 0x80;  *w1 = 0x80;  return 1;
+	case 0x46: *w0 = 0x100; *w1 = 0x20;  return 1;
+	case 0x50: *w0 = 0x100; *w1 = 0x40;  return 1;
+	case 0x5a: *w0 = 0x100; *w1 = 0x80;  return 1;
+	case 0x64: *w0 = 0x100; *w1 = 0x100; return 1;
+	case 0x6e: *w0 = 0x200; *w1 = 0x40;  return 1;
+	case 0x78: *w0 = 0x200; *w1 = 0x80;  return 1;
+	case 0x82: *w0 = 0x200; *w1 = 0x100; return 1;
+	case 0x8c: *w0 = 0x200; *w1 = 0x200; return 1;
+	default: return 0;
+	}
+}
+
+// ---- aa120 (rva 0xaa120) ----
+extern "C" __declspec(dllimport) int __stdcall VirtualProtect(void *a, DWORD n, DWORD p, DWORD *o);
+extern "C" void *memcpy(void *d, const void *s, size_t n);
+void FUNC_100AA120(void *dst, const void *src, DWORD n)
+{
+	DWORD oldProt, oldProt2;
+	VirtualProtect(dst, n, 0x40, &oldProt);
+	memcpy(dst, src, n);
+	VirtualProtect(dst, n, oldProt, &oldProt2);
+}
+
+// ---- a9560 (rva 0xa9560) ----
+struct ObjA9560;
+struct NetA9560 {
+	int FUNC_100A0970(int id);
+	void FUNC_100A09A0(int id, int a2);
+	void FUNC_100A0940(int id, int a2);
+};
+extern NetA9560 *g_pNetA9560;
+struct ObjA9560 {
+	char _p[0x49];
+	BYTE m_b49;
+	DWORD m_dw4A;
+	int m_i4E;
+	char _q[2];
+	float m_f54;
+	char _r[0x10];
+	float m_f68;
+	char _s[0x112d];
+	BYTE m_b1199;
+	char FUNC_100A7F50();
+	float FUNC_1009F190();
+	int FUNC_1009FA60();
+	void FUNC_1009EF50(int id);
+	void FUNC_1009FBB0();
+	void FUNC_100A8FA0();
+	void FUNC_100A9560();
+};
+void ObjA9560::FUNC_100A9560()
+{
+	BYTE flag = m_b1199;
+	m_b49 = 0;
+	BYTE b = 0;
+	if (flag) {
+		if (!FUNC_100A7F50()) b = 1;
+	}
+	float f = FUNC_1009F190();
+	m_f68 = f;
+	if (f > m_f54 || b) {
+		if (FUNC_1009FA60() && ++m_dw4A == 1000) {
+			FUNC_1009FBB0();
+			m_dw4A = 0;
+			if (m_i4E > 0) {
+				if (FUNC_100B4700(m_i4E) == 0)
+					g_pNetA9560->FUNC_100A09A0(m_i4E, 0);
+			}
+		}
+	} else {
+		if (!FUNC_1009FA60()) {
+			if (!g_pNetA9560->FUNC_100A0970(m_i4E)) {
+				g_pNetA9560->FUNC_100A0940(m_i4E, 2);
+				return;
+			}
+			FUNC_1009EF50(m_i4E);
+		}
+		if (FUNC_1009FA60()) {
+			m_b49 = 1;
+			m_dw4A = 0;
+			FUNC_100A8FA0();
+			return;
+		}
+	}
+}
+

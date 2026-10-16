@@ -381,4 +381,327 @@ ObjA_A0110 *FUNC_100A0110(DWORD a, DWORD b, DWORD c, DWORD d, DWORD e, DWORD f, 
 		}
 	}
 	return 0;
+}// ---- a36c0 (rva 0xa36c0) ----
+struct PPool36 {
+	void *FUNC_100138C0(void *veh);
+	int FUNC_100010B0(void *u);
+	int FUNC_1000E470(void *u);
+};
+struct Npc36 {
+	int FUNC_100ACEF0();
+	int FUNC_100ACE40();
+	char FUNC_100ABC50();
+	void FUNC_100AC060(int a, int b);
+};
+struct NetEnt36 {
+	void FUNC_10005AD0(int id, int f);
+};
+struct PoolEnt36 { DWORD f0; PPool36 *f4; };
+struct NetGame36 { char _p[0x3de]; PoolEnt36 *f3DE; };
+extern NetGame36 *g_pNetGame;         // 0x1026eb94
+extern DWORD *g_pPoolEnt;             // 0x1015073c
+extern NetEnt36 *g_pLocalPlayer;      // 0x10150c80
+extern WORD g_wEntId;                 // 0x101506d0
+extern DWORD g_pEntObj;               // 0x10150984
+extern DWORD g_10150a38;              // 0x10150a38
+extern WORD __stdcall FUNC_1001EB90(DWORD id);
+int FUNC_100A36C0()
+{
+	PPool36 *pp;
+	DWORD *veh;
+	void *u;
+	if (g_pNetGame) {
+		g_pPoolEnt = (DWORD *)g_pNetGame->f3DE->f0;
+		pp = g_pNetGame->f3DE->f4;
+		g_pLocalPlayer = *(NetEnt36 **)((char *)pp + 0x26);
+		g_wEntId = FUNC_1001EB90(g_10150a38);
+		if (g_wEntId == 0xffff || g_wEntId >= 0x7d0
+			|| !g_pPoolEnt[0xc1d + g_wEntId]
+			|| (g_pEntObj = g_pPoolEnt[0x44d + g_wEntId],
+				*(DWORD *)(g_pEntObj + 0x60) != 0
+				|| *(short *)(*(DWORD *)(g_pEntObj + 0x4c) + 0x22) == 0x23a))
+			return 0;
+		if (g_pLocalPlayer) {
+			if (*(Npc36 **)((char *)g_pLocalPlayer + 0x104)
+				&& (*(Npc36 **)((char *)g_pLocalPlayer + 0x104))->FUNC_100ACEF0())
+				return 0;
+			if (g_pLocalPlayer
+				&& *(Npc36 **)((char *)g_pLocalPlayer + 0x104)
+				&& (*(Npc36 **)((char *)g_pLocalPlayer + 0x104))->FUNC_100ACE40())
+				return 0;
+		}
+		veh = *(DWORD **)(*(DWORD *)(g_pEntObj + 0x4c) + 0x460);
+		if (veh) {
+			if (veh[0x166]) return 0;
+			u = pp->FUNC_100138C0(veh);
+			if (pp->FUNC_100010B0(u) && pp->FUNC_1000E470(u))
+				return 0;
+		}
+		if (*(Npc36 **)((char *)g_pLocalPlayer + 0x104)
+			&& (*(Npc36 **)((char *)g_pLocalPlayer + 0x104))->FUNC_100ABC50() == '.')
+			(*(Npc36 **)((char *)g_pLocalPlayer + 0x104))->FUNC_100AC060(0, 0);
+		g_pLocalPlayer->FUNC_10005AD0(g_wEntId, 0);
+	}
+	return 1;
 }
+
+// ---- ac750 (rva 0xac750) ----
+extern WORD g_wA4326C;              // 0xa4326c
+extern DWORD g_A4331C;              // 0xa4331c
+extern DWORD g_A43320;              // 0xa43320
+extern DWORD g_A432E8;              // 0xa432e8
+extern DWORD g_A432C0;              // 0xa432c0
+void __stdcall FUNC_100AC750(DWORD *a, DWORD b)
+{
+	DWORD *p, t;
+	g_wA4326C = 0;
+	t = a[0];
+	p = (DWORD *)0xa43318;
+	p[0] = t;
+	g_A4331C = a[1];
+	g_A43320 = a[2];
+	g_A432E8 = b;
+	g_A432C0 = 0;
+}
+
+// ---- acac0 (rva 0xacac0) ----
+struct ObjAcac0 {
+	char _p[0x2a4];
+	struct Sub { char _p2[0x718]; BYTE b718; } *m_p2A4;
+	void *FUNC_100ACAC0();
+};
+struct PoolAcac0 { void *FUNC_100A13E0(DWORD d, int n); };
+extern PoolAcac0 *g_pPoolAcac0;       // 0x1026ebac
+void *ObjAcac0::FUNC_100ACAC0()
+{
+	volatile void *r;
+	volatile void *out;
+	Sub *sub = m_p2A4;
+	if (sub) {
+		DWORD *slot = sub
+			? (DWORD *)((char *)sub + sub->b718 * 0x1c + 0x5a0)
+			: 0;
+		r = g_pPoolAcac0->FUNC_100A13E0(*slot, 1);
+		out = (char *)r + 0x24;
+	}
+	return (void *)r;
+}
+
+// ---- aa4e0 (rva 0xaa4e0) ----
+extern int (__stdcall *g_pfnVP)(void *a, DWORD n, DWORD p, DWORD *o); // 0x100e5184
+void FUNC_100AA4E0(DWORD mul)
+{
+	DWORD old;
+	DWORD *p;
+	int (__stdcall *vp)(void *, DWORD, DWORD, DWORD *) = g_pfnVP;
+	(*vp)((void *)0x411458, 4, 0x40, &old);
+	*(DWORD *)0x411458 = mul;
+	mul *= 0x2c;
+	p = (DWORD *)0x101166f8;
+	do {
+		(*vp)((void *)(*p + 2), 4, 0x40, &old);
+		*(DWORD *)(*p + 2) = mul;
+		p++;
+	} while (p != (DWORD *)0x10116714);
+}
+
+// ---- 9de40 (rva 0x9de40) ----
+extern void FUNC_100B3B10(DWORD *a, DWORD *b, DWORD *c, void *d,
+	int e, int f, int g, int h, int i, int j, int k, int l, int m);
+float FUNC_1009DE40(DWORD *a)
+{
+	DWORD l0 = a[0];
+	DWORD l1 = a[1];
+	float f = -100.0f;
+	char buf[0x40];
+	FUNC_100B3B10(a, &l1, &l0, buf, 1, 0, 0, 1, 1, 1, 0, 0, 0);
+	return f;
+}
+
+// ---- ada40 (rva 0xada40) ----
+extern int FUNC_100B40A0(void *e);
+extern void *FUNC_100B4050(void *e);
+struct SubA40 {
+	DWORD f0;
+	char _p[0x14];
+	void *f18;
+	char _q[0x460];
+	struct Nxt { char _p2[0x10]; void *f10; } *f47C;
+};
+struct ObjAda40 {
+	char _p[0x2a4];
+	SubA40 *m_p2A4;
+	int FUNC_100ADA40();
+};
+int ObjAda40::FUNC_100ADA40()
+{
+	void *e;
+	SubA40 *s = m_p2A4;
+	if (s && s->f0 != 0x863c40) {
+		if (s->f18) {
+			e = s->f47C->f10;
+			if (!e) return 0;
+			if (FUNC_100B40A0(e) == 0x191) return 1;
+			while (FUNC_100B40A0(e) != 0x191) {
+				e = FUNC_100B4050(e);
+				if (!e) return 0;
+			}
+			if (e && FUNC_100B40A0(e) == 0x191) return 1;
+		}
+	}
+	return 0;
+}
+
+// ---- a8fd0 (rva 0xa8fd0) ----
+struct VECTOR8 { float x, y, z; };
+struct MATRIX4X4_8 {
+	VECTOR8 vA; DWORD u0;
+	VECTOR8 vB; DWORD u1;
+	VECTOR8 vC; DWORD u2;
+	DWORD f30, f34, f38, f3c;
+};
+struct ObjA8fd0 {
+	char _p[0x40];
+	DWORD *m_p40;
+	char _q[0xa];
+	DWORD m_dw4E;
+	char _r[0xa];
+	DWORD m_5C, m_60, m_64;
+	void FUNC_1009EB10(MATRIX4X4_8 *st);
+	void FUNC_100A8FD0();
+};
+extern int FUNC_100B6410(DWORD, void *);
+extern void FUNC_100B4D10(void *, MATRIX4X4_8 *, void *);
+void ObjA8fd0::FUNC_100A8FD0()
+{
+	char buf[0xc];
+	float v[3];
+	MATRIX4X4_8 st;
+	if (m_p40 && *m_p40 != 0x863c40) {
+		FUNC_1009EB10(&st);
+		if (FUNC_100B6410(m_dw4E, buf)) {
+			FUNC_100B4D10(&m_5C, &st, buf);
+			return;
+		}
+		m_5C = *(DWORD *)&v[0];
+		m_60 = *(DWORD *)&v[1];
+		m_64 = *(DWORD *)&v[2];
+	}
+}
+
+// ---- a9110 (rva 0xa9110) ----
+// semantic twin: CObject constructor. The original wraps each init call in an
+// SEH __try frame (fs:[0] chain + unwind funclets), which plain C++ cannot
+// express byte-wise; the field/store sequence is faithful otherwise.
+struct ObjA9110 {
+	void **vt;
+	DWORD f4[0xf];
+	char _p[0x2];
+	WORD m_w30;
+	char _q[0x8a];
+	WORD m_wBE;
+	DWORD m_dwC0, m_dwC4, m_dwC8, m_dwCC, m_dwD0, m_dwD4;
+	BYTE m_bD8;
+	char _r[0x35];
+	BYTE m_b10E;
+	char _s[0x4f];
+	DWORD m_dw160;
+	DWORD m_dw164;
+	char _t[0x6e];
+	BYTE m_b1D6;
+	char _u[0x39];
+	DWORD m_dw213;
+	DWORD m_dw217;
+	char _v[0xa];
+	BYTE m_b225;
+	char _w[0x58];
+	DWORD m_dw282;
+	char _x[0xe];
+	BYTE m_b294;
+	char _y[0xe5];
+	BYTE m_b37D;
+	char _z[0x9];
+	DWORD m_dw38A;
+	DWORD m_dw38E;
+	DWORD m_dw392;
+	DWORD m_dw396;
+	DWORD m_dw39A;
+	BYTE m_b39E;
+	char _a2[0x6];
+	DWORD m_dw3A8;
+	char _b2[0x4f];
+	BYTE m_b3FB;
+	char _c2[0x6];
+	DWORD m_dw405;
+	DWORD m_dw409;
+	DWORD m_dw40D;
+	DWORD m_dw411;
+	char _d2[0x97];
+	BYTE m_b4AC;
+	char _e2[0xce3];
+	BYTE m_b1193;
+	char _f2[5];
+	BYTE m_b1199, m_b119A, m_b119B;
+	void FUNC_100A9110(int model, BYTE c28, BYTE c2c, float x, float y, float z);
+};
+extern int FUNC_100B4570();
+extern int __stdcall FUNC_100A7A40(int model);
+extern int FUNC_100B64A0(int);
+extern int FUNC_100B44E0(int);
+extern void FUNC_100B4550(int, int);
+extern void FUNC_100AA4C0(int);
+extern void FUNC_100B2310(int model, float x, float y, float z, void *cb);
+extern void *DAT_100eccf0;
+extern BYTE DAT_0046977f;
+extern int g_100E5940;
+extern void *vt_A9110[];
+void ObjA9110::FUNC_100A9110(int model, BYTE c28, BYTE c2c, float x, float y, float z)
+{
+	int iVar5, iVar3;
+	BYTE b2;
+	for (int i = 0xf; i; i--)
+		f4[i - 1] = 0;
+	m_wBE = 0xffff;
+	m_w30 = 0xffff;
+	m_b1193 = c28;
+	vt = vt_A9110;
+	m_dw160 = m_dw164 = 0;
+	m_dwC0 = m_dwC4 = m_dwC8 = m_dwCC = m_dwD0 = m_dwD4 = 0;
+	m_bD8 = 1;
+	m_b10E = 0;
+	m_dw213 = 0;
+	m_dw217 = 0;
+	m_b225 = 0;
+	m_dw282 = 0;
+	m_b294 = 0;
+	m_b37D = 0;
+	m_dw38A = m_dw38E = m_dw392 = m_dw396 = m_dw39A = 0;
+	m_b39E = 0;
+	m_dw3A8 = 0;
+	m_b3FB = 0;
+	m_dw405 = m_dw409 = m_dw40D = m_dw411 = 0;
+	m_b4AC = 0;
+	m_b1199 = m_b119A = m_b119B = 0;
+	if (c28 || c2c) {
+		m_b1199 = 1;
+		m_b119A = c28;
+		m_b119B = c2c;
+	}
+	iVar5 = FUNC_100B4570();
+	if (!iVar5)
+		model = 0x48c7;
+	iVar5 = FUNC_100A7A40(model);
+	b2 = FUNC_100B64A0(iVar5);
+	m_b1D6 = (b2 >> 1) & 1;
+	if (z != *(float *)&g_100E5940 && iVar5) {
+		iVar3 = FUNC_100B44E0(iVar5);
+		if (iVar3)
+			FUNC_100B4550(iVar5, *(int *)&z);
+	}
+	if (model < 0) {
+		FUNC_100AA4C0(1);
+		DAT_0046977f = 0x75;
+	}
+	FUNC_100B2310(model, x, y, z, &DAT_100eccf0);
+}
+
