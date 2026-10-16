@@ -201,3 +201,64 @@ int CXf::FUNC_1006F440() { return field_4d; }
 int CXf::FUNC_1006F450( int i ) { return field_51[i]; }
 void CXj::FUNC_100684B0( char v ) { field_c = v; field_63da = 1; }
 char CXj::FUNC_100684D0() { return field_c; }
+
+// ---------------- SocketLayer::RecvFrom ----------------
+// VERIFIED byte-exact: rows 0x53a00 + 0x53a39. FUN_1003f440 is the decode/parcels
+// handler called with (sin_addr, ntohs(port), buf, len, rakPeer) as a 5-arg __stdcall.
+typedef unsigned int SOCKET;
+typedef unsigned short u_short;
+typedef unsigned long u_long;
+typedef int socklen_t;
+#define INVALID_SOCKET ((SOCKET)~0)
+#define SOCKET_ERROR -1
+#define AF_INET 2
+#define MAXIMUM_MTU_SIZE 0x5d4
+#define COMPATIBILITY_2_RECV_FROM_FLAGS 0
+struct in_addr { u_long s_addr; };
+struct sockaddr_in { short sin_family; u_short sin_port; in_addr sin_addr; char sin_zero[8]; };
+struct sockaddr { u_short sa_family; char sa_data[14]; };
+extern "C" {
+__declspec(dllimport) int __stdcall recvfrom( SOCKET, char *, int, int, sockaddr *, socklen_t * );
+__declspec(dllimport) u_short __stdcall ntohs( u_short );
+}
+class RakPeer;
+extern "C" void __stdcall FUN_1003f440( u_long, unsigned short, char *, int, RakPeer * );
+class SocketLayer
+{
+public:
+	int RecvFrom( const SOCKET s, RakPeer *rakPeer, int *errorCode );
+};
+int SocketLayer::RecvFrom( const SOCKET s, RakPeer *rakPeer, int *errorCode )
+{
+	int len;
+	char data[ MAXIMUM_MTU_SIZE ];
+	sockaddr_in sa;
+
+	const socklen_t len2 = sizeof( struct sockaddr_in );
+	sa.sin_family = AF_INET;
+
+	if ( s == INVALID_SOCKET )
+	{
+		*errorCode = SOCKET_ERROR;
+		return -1;
+	}
+
+	len = recvfrom( s, data, MAXIMUM_MTU_SIZE, COMPATIBILITY_2_RECV_FROM_FLAGS, ( sockaddr* ) & sa, ( socklen_t* ) & len2 );
+
+	if ( len != SOCKET_ERROR )
+	{
+		unsigned short portnum;
+		portnum = ntohs( sa.sin_port );
+
+		if ( len > 0 )
+			FUN_1003f440( sa.sin_addr.s_addr, portnum, data, len, rakPeer );
+
+		return 1;
+	}
+	else
+	{
+		*errorCode = 0;
+	}
+
+	return 0; // no data
+}

@@ -324,3 +324,114 @@ HRESULT __cdecl FUNC_1007C230( void *a1, int cchMax, char *dst, const char *src 
 int CXp::FUNC_1006E8B0() { return field_0; }
 int CXp::FUNC_1006E8C0() { return *( int * ) ( ( char * ) this + 0x22 ); } // unaligned dword read
 int CXp::FUNC_1006E8D0() { return *( int * ) ( ( char * ) this + 0x24 ); }
+\n// ---------------- FUNC_10071930 (VERIFIED) + FUNC_100719E0 (SEMANTIC) ----------------
+typedef unsigned long DWORD;
+
+class CXr
+{
+public:
+	char _p0[0x4d];
+	int field_4d;
+};
+
+class CXqSub;
+extern float g_100e60a4;
+#pragma comment(linker,"/alternatename:_g_100e60a4=_x_100e60a4")
+
+class CXFontMgr
+{
+public:
+	char _p0[0x10b];
+	int field_10b;   // actually a CXTextObj* — keep int-typed decl here
+	void FUNC_10073460( int n, float scale );
+};
+extern CXFontMgr *g_1026eb60;
+#pragma comment(linker,"/alternatename:_g_1026eb60=_x_1026eb60")
+
+class CXqSub
+{
+public:
+	CXr *FUNC_10087270( int id, int a );
+};
+
+class CXq
+{
+public:
+	char _p0[0x20];
+	CXqSub *field_20;
+
+	void FUNC_10071930();
+};
+
+void CXq::FUNC_10071930()
+{
+	if( !field_20 )
+		return;
+
+	CXr *f = field_20->FUNC_10087270( 0x1e, 5 );
+	if( f->field_4d )
+		g_1026eb60->FUNC_10073460( 0, ( float ) f->field_4d * g_100e60a4 );
+
+	f = field_20->FUNC_10087270( 0x20, 5 );
+	if( f->field_4d )
+		g_1026eb60->FUNC_10073460( 1, ( float ) f->field_4d * g_100e60a4 );
+
+	f = field_20->FUNC_10087270( 0x22, 5 );
+	if( f->field_4d )
+		g_1026eb60->FUNC_10073460( 2, ( float ) f->field_4d * g_100e60a4 );
+}
+
+// ---------- 0x719e0: 3-pass stat text draw ----------
+struct CXRect { int left, top, right, bottom; };
+class CXqSub2
+{
+public:
+	char _p0[0x126];
+	int field_126;
+};
+class CXTextObj;
+
+extern "C" int __stdcall FUN_10071fa0( int n, int b, CXRect *r, int a, DWORD color );
+#pragma comment(linker,"/alternatename:_FUN_10071fa0@20=_x_71fa0")
+
+class CXq2
+{
+public:
+	char _p0[4];
+	int field_4;
+	int field_8;
+	int field_c;
+	int field_10;
+	int field_14;
+	int field_18;
+	int field_1c;
+	CXqSub2 *field_20;
+
+	void FUNC_100719E0();
+};
+
+void CXq2::FUNC_100719E0()
+{
+	CXTextObj *t = ( CXTextObj * ) g_1026eb60->field_10b;
+	if( !t )
+		return;
+	int x = field_4 + 0x19;
+	CXRect r;
+	r.left = x;
+	r.right = x + 1;
+	int y = field_20->field_126 + field_8 + 0x1e;
+	r.top = y;
+	r.bottom = y + 1;
+	int w = FUN_10071fa0( 0, 1, &r, 0x105, 0xff9999cc );
+	( *( void (__stdcall **)( CXTextObj *, int, int ) ) ( *( int * ) t + 0x38 ) )( t, 0, w );
+
+	r.top = r.top + field_1c;
+	r.bottom = r.top + 1;
+	w = FUN_10071fa0( 1, 1, &r, 0x105, 0xffcc9999 );
+	( *( void (__stdcall **)( CXTextObj *, int, int ) ) ( *( int * ) t + 0x38 ) )( t, 0, w );
+
+	r.top = r.top + field_1c;
+	r.bottom = r.top + 1;
+	w = FUN_10071fa0( 2, 1, &r, 0x105, 0xff99cc99 );
+	( *( void (__stdcall **)( CXTextObj *, int, int ) ) ( *( int * ) t + 0x38 ) )( t, 0, w );
+}
