@@ -705,3 +705,508 @@ void ObjA9110::FUNC_100A9110(int model, BYTE c28, BYTE c2c, float x, float y, fl
 	FUNC_100B2310(model, x, y, z, &DAT_100eccf0);
 }
 
+// ---- a9650 (rva 0xa9650) ----
+// semantic twin: per-tick movement/state update (CVehicle-class member, 1408B).
+extern "C" void *memcpy(void *, const void *, size_t);
+// The original wraps every call in SEH __try frames (fs:[0] chain + funclets)
+// and does the physics on the x87 stack; plain C++ cannot express either
+// byte-wise. Field/store sequence is faithful to FUN_100a9650.c.
+struct V9650 { float x, y, z; };
+struct M9650 { V9650 a; DWORD u0; V9650 b; DWORD u1; V9650 pos; DWORD u2; DWORD f30, f34, f38, f3c; };
+struct NetB9650 {
+	void FUNC_10001010();
+	int FUNC_100ABE70();
+	int FUNC_100A0970(int id);
+	void FUNC_100A0940(int id, int a2);
+};
+extern NetB9650 *g_pNetB9650;
+struct ObjA9650 {
+	char _p[0x4e];
+	int m_i4E;
+	char _q[2];
+	float m_f54;
+	char _r[0xaf];
+	V9650 m_vPos;
+	char _s[0x42];
+	int m_i15F;
+	int m_i163;
+	V9650 m_v167;
+	V9650 m_v177;
+	V9650 m_v187;
+	float m_f19F;
+	float m_f1AB;
+	BYTE m_b1AF;
+	float m_f1B0;
+	BYTE m_b1B5;
+	char _t[0xfd2];
+	int m_i118B;
+	BYTE m_b1199;
+	char _u[0x1a];
+	float m_f15B;
+	char _v[0x63];
+	WORD m_wBE;
+	WORD m_wC0;
+	void FUNC_100A9560();
+	int FUNC_1009FA60();
+	float FUNC_1009F190();
+	float FUNC_100A7FC0(M9650 *);
+	void FUNC_1009EB10(M9650 *);
+	void FUNC_1009ED10(V9650 v);
+	void FUNC_1009EE60(V9650 v);
+	void FUNC_1009F8F0(float *, float *, float *);
+	void FUNC_1009FD00(M9650 *);
+	void FUNC_1009FD60();
+	void FUNC_100A8030();
+	float FUNC_100A8000();
+	int FUNC_1009F3D0();
+	void FUNC_100A9650(float dt);
+};
+extern int FUNC_1002E7F0();
+extern void *FUNC_10002DE0(int);
+extern void FUNC_100A8240(void *);
+extern void FUNC_100A82C0(void *);
+extern void thunk_FUN_100B5300(M9650 *, V9650 *);
+extern void FUNC_100B5480(float *, V9650 *, V9650 *, V9650 *);
+extern void FUNC_100B5500(V9650 *);
+extern float FUNC_100B48B0(float *, float *, float *);
+extern DWORD g_1026EB94;
+extern float g_100E6170, g_100E5808, g_100E60A4, g_100E8DD8;
+extern float g_100E5B2C, g_100E611C, g_100E6120, g_100E6130, g_100ECD80;
+void ObjA9650::FUNC_100A9650(float dt)
+{
+	M9650 m1, m2;
+	V9650 vel, pos;
+	float t, h, dist, f94, fr, f2, f3, f4;
+	DWORD *pool, *ent, *veh;
+	void *p;
+	int now;
+	WORD id;
+
+	if (m_i118B || g_100E6170 < m_f54 || m_b1199) {
+		FUNC_100A9560();
+	} else if (!FUNC_1009FA60()) {
+		g_pNetB9650->FUNC_10001010();
+		if (g_pNetB9650->FUNC_100ABE70()) {
+			if (FUNC_1009F190() < m_f54 - g_100E5808) {
+				if (!g_pNetB9650->FUNC_100A0970(m_i4E))
+					g_pNetB9650->FUNC_100A0940(m_i4E, 2);
+			}
+		}
+	}
+	id = m_wBE;
+	if (id != 0xffff) {
+		if (!g_1026EB94) return;
+		pool = *(DWORD **)(g_1026EB94 + 0x3de);
+		if (!pool || !*pool) return;
+		if (id > 1999) return;
+		ent = (DWORD *)pool[0x3074 / 4 + id];
+		if (!ent) return;
+		veh = (DWORD *)pool[0x1134 / 4 + id];
+		if (!veh) return;
+		if (((ObjA9650 *)veh)->FUNC_1009F3D0())
+			FUNC_100A8240(veh);
+		return;
+	}
+	if (m_wC0 != 0xffff) {
+		if (!g_1026EB94) return;
+		if (!*(DWORD *)(*(DWORD *)(g_1026EB94 + 0x3de) + 0xc)) return;
+		p = FUNC_10002DE0(m_wC0);
+		if (!p) return;
+		FUNC_100A82C0(p);
+		return;
+	}
+	if (!(m_b1AF & 1)) return;
+	FUNC_1009EB10(&m1);
+	dist = dt * m_f1B0;
+	h = FUNC_100A7FC0(&m1);
+	now = FUNC_1002E7F0();
+	fr = (now - m_i15F) * g_100E60A4;
+	m_i163 = now;
+	pos = m1.pos;
+	fr *= m_f1B0;
+	f94 = m_f15B - h;
+	if (h <= dist) {
+		vel.x = vel.y = vel.z = 0;
+		FUNC_1009ED10(vel);
+		FUNC_1009EE60(vel);
+		pos = m_vPos;
+		if (m_b1B5)
+			thunk_FUN_100B5300(&m1, &m_v167);
+		memcpy(&m2, &m1, sizeof(M9650));
+		FUNC_1009FD00(&m2);
+		FUNC_100A8030();
+		return;
+	}
+	if (dt <= g_100E8DD8) return;
+	f2 = g_100E5B2C / (h / dist);
+	f4 = (m_vPos.x - pos.x) * f2 + pos.x;
+	f3 = (m_vPos.y - pos.y) * f2 + pos.y;
+	f2 = (m_vPos.z - pos.z) * f2 + pos.z;
+	dist = h / m_f15B;
+	float f90 = g_100E5B2C - dist;
+	dt = g_100E5B2C / dt;
+	vel.x = (f4 - pos.x) * dt * g_100E6130;
+	vel.y = (f3 - pos.y) * dt * g_100E6130;
+	vel.z = (f2 - pos.z) * dt * g_100E6130;
+	pos.x = f4; pos.y = f3; pos.z = f2;
+	f2 = FUNC_100B48B0(&f94, &fr, &dist);
+	if (g_100E611C < f2) {
+		float s;
+		if (fr <= f94) {
+			if (f94 <= fr) s = g_100E5B2C;
+			else s = g_100E5B2C - (f94 - fr) * g_100E611C;
+		} else {
+			s = (fr - f94) * g_100E611C + g_100E5B2C;
+		}
+		vel.x *= s; vel.y *= s; vel.z *= s;
+	}
+	FUNC_1009ED10(vel);
+	FUNC_1009FD60();
+	if (!m_b1B5) {
+		FUNC_1009EB10(&m2);
+	} else {
+		FUNC_1009F8F0(&h, &fr, &f94);
+		dist = m_f19F - dist * m_f1AB;
+		f2 = FUNC_100A8000() * g_100E6120;
+		if (f2 <= g_100E60A4) {
+			if (f2 < g_100ECD80) f2 = -0.001f;
+		} else {
+			f2 = 0.001f;
+		}
+		vel.x = vel.y = 0; vel.z = f2;
+		FUNC_1009EE60(vel);
+		FUNC_1009EB10(&m2);
+		FUNC_100B5480(&f90, &m_v167, &m_v187, &m_v177);
+		FUNC_100B5500(&m_v177);
+		thunk_FUN_100B5300(&m2, &m_v177);
+	}
+	memcpy(&m1, &m2, sizeof(M9650));
+	FUNC_1009FD00(&m1);
+}
+
+// ---- a9ee0 (rva 0xa9ee0) ----
+struct SndA9EE0 {
+	int FUNC_100708B0(int a1, void *name, BYTE a3, DWORD w0, DWORD w1,
+		DWORD a6, DWORD a7, BYTE a8, BYTE a9);
+};
+extern SndA9EE0 *g_pSndA9EE0;
+struct ObjA9EE0 {
+	char _p[0x217];
+	DWORD m_a217[0x10];
+	char _q[0x84];
+	DWORD m_a2DB[0x10];
+	DWORD m_a31B[0x10];
+	int FUNC_100A8C80(BYTE code, DWORD *w0, DWORD *w1);
+	void FUNC_100A9EE0();
+};
+void ObjA9EE0::FUNC_100A9EE0()
+{
+	DWORD w0, w1;
+	int r;
+	BYTE i;
+	BYTE *rec;
+	DWORD code;
+	DWORD *p;
+	p = m_a2DB;
+	rec = (BYTE *)this + 0x431;
+	for (i = 0x10; i; i--, p++, rec += 0xd7) {
+		if (!p[-0x31]) continue;
+		if (*p != 2) continue;
+		if (p[0x10]) continue;
+		code = rec[-0x4c];
+		if (!FUNC_100A8C80(code, &w0, &w1)) continue;
+		r = g_pSndA9EE0->FUNC_100708B0(p[0x37c], rec - 0x4b, rec[-0xa],
+			w0, w1, *(DWORD *)(rec - 8), *(DWORD *)(rec - 4),
+			rec[-9], *rec);
+		p[0x39c] = r;
+		p[0x10] = 1;
+	}
+}
+
+// ---- a9f90 (rva 0xa9f90) ----
+struct VECTOR8_A9F90 { float x, y, z; };
+struct ObjA9F90 {
+	char _p[0x40];
+	DWORD *m_p40;
+	char _q[0xa];
+	DWORD m_dw4E;
+	char _r[6];
+	float m_f58;
+	VECTOR8_A9F90 m_v5C;
+	float m_f68;
+	BYTE m_b6C;
+	char _s[0x111b];
+	int m_i118B;
+	int m_i118F;
+	char _t[0x3c];
+	int m_i1CF;
+	int FUNC_1009FA60();
+	void FUNC_100A8FD0();
+	void FUNC_100A8C00();
+	void FUNC_100A8F60();
+	void FUNC_100A9040();
+	void FUNC_100A9080();
+	void FUNC_100A9E70();
+	void FUNC_100A9F90();
+};
+struct NetA9F90 {
+	float FUNC_1009D700(VECTOR8_A9F90 *v);
+};
+extern DWORD g_1026EBAC;
+extern int __stdcall FUNC_100B4240(VECTOR8_A9F90 *, DWORD);
+extern int __stdcall FUNC_100B64A0(DWORD);
+extern void FUNC_100C3E20(int, int);
+extern void FUNC_100C3D30(int);
+extern void FUNC_100B6330(int);
+extern DWORD g_00B72914;
+extern DWORD g_101A2610;
+extern float g_100ECD88;
+void ObjA9F90::FUNC_100A9F90()
+{
+	if (!m_p40) return;
+	if (*m_p40 == 0x863c40) return;
+	if (!FUNC_1009FA60()) return;
+	FUNC_100A8FD0();
+	if (!((*(NetA9F90 **)(g_1026EBAC + 4))->FUNC_1009D700(&m_v5C) < m_f58) &&
+	    !FUNC_100B4240(&m_v5C, *(DWORD *)&m_f58))
+		return;
+	if (m_b6C)
+		FUNC_100C3E20(0x1e, (!g_00B72914 && !(FUNC_100B64A0(m_dw4E) & 8)) ? 100 : 0);
+	FUNC_100C3E20(0x14, (FUNC_100B64A0(m_dw4E) & 0x40) ? 2 : 1);
+	if (m_i118B && m_i118F)
+		FUNC_100A8C00();
+	FUNC_100C3D30(1);
+	if (!m_i118B || !m_i1CF) {
+		if (m_f68 < g_100ECD88) {
+			FUNC_100A8F60();
+			goto done;
+		}
+	} else if (m_f68 < g_100ECD88) {
+		FUNC_100A9040();
+		FUNC_100B6330(FUNC_1009FA60());
+		FUNC_100A9080();
+		goto done;
+	}
+	FUNC_100B6330(FUNC_1009FA60());
+done:
+	if (m_i118B && m_i118F)
+		FUNC_100A9E70();
+	g_101A2610 = 0;
+	m_i118F = 1;
+}
+
+// ---- aad60 (rva 0xaad60) ----
+typedef int (__cdecl *PFNVP)(DWORD addr, DWORD n, DWORD prot, DWORD *old);
+extern "C" void *memcpy(void *, const void *, size_t);
+
+void __cdecl FUNC_100AAD60()
+{
+	DWORD old;
+	void *tbl = memcpy((void *)0x1026afd8, (void *)0x101169c8, 0x400);
+	PFNVP vp = *(PFNVP *)0x100e5184;
+	vp(0x44b1c1, 4, 0x40, &old);
+	*(void **)0x44b1c1 = tbl;
+	vp(0x4c8390, 4, 0x40, &old);
+	*(void **)0x4c8390 = tbl;
+	vp(0x4c8399, 4, 0x40, &old);
+	*(void **)0x4c8399 = (char *)tbl + 1;
+	vp(0x4c83a3, 4, 0x40, &old);
+	*(void **)0x4c83a3 = (char *)tbl + 2;
+	vp(0x5817cc, 4, 0x40, &old);
+	*(void **)0x5817cc = tbl;
+	vp(0x582176, 4, 0x40, &old);
+	*(void **)0x582176 = tbl;
+	vp(0x6a6ffa, 4, 0x40, &old);
+	*(void **)0x6a6ffa = tbl;
+}
+
+// ---- aae30 (rva 0xaae30) ----
+typedef int (__cdecl *PFNVP_AE30)(DWORD addr, DWORD n, DWORD prot, DWORD *old);
+extern void FUNC_100A60F0();
+extern void FUNC_100AAA80();
+extern void FUNC_100AA9C0();
+extern void FUNC_100AAD60();
+extern void FUNC_100AAA10();
+extern void FUNC_100AA590();
+extern void FUNC_10002100();
+void __cdecl FUNC_100AAE30()
+{
+	DWORD old;
+	DWORD *p;
+	DWORD nop = 0x90909090;
+	PFNVP_AE30 vp = *(PFNVP_AE30 *)0x100e5184;
+	vp(0x704e8a, 5, 0x40, &old);
+	p = (DWORD *)0x704e8a;
+	*p = nop;
+	*(BYTE *)(p + 1) = (BYTE)nop;
+	vp(0x609a4e, 6, 0x40, &old);
+	p = (DWORD *)0x609a4e;
+	*p = nop;
+	*(WORD *)(p + 1) = (WORD)nop;
+	FUNC_100A60F0();
+	FUNC_100AAA80();
+	FUNC_100AA9C0();
+	FUNC_100AAD60();
+	FUNC_100AAA10();
+	FUNC_100AA590();
+	vp(0x47bf54, 4, 0x40, &old);
+	FUNC_10002100();
+}
+
+// ---- aea80 (rva 0xaea80) ----
+extern "C" void *memcpy(void *, const void *, size_t);
+typedef int (__cdecl *PFN_AEA80_1)(void *);
+typedef int (__cdecl *PFN_AEA80_2)(int, int);
+extern DWORD g_1026EB28;
+struct ObjAEA80 {
+	char _p[0x2a4];
+	DWORD *m_p2A4;
+	void FUNC_100AEA80(void *out, int a2);
+};
+void ObjAEA80::FUNC_100AEA80(void *out, int a2)
+{
+	DWORD *s = m_p2A4;
+	void *e;
+	int r2;
+	PFN_AEA80_1 pfn1;
+	PFN_AEA80_2 pfn2;
+	int r1;
+	DWORD src;
+	if (!s || *s == 0x863c40) return;
+	e = (void *)s[6];
+	if (!e) return;
+	pfn1 = (PFN_AEA80_1)0x734a40;
+	pfn2 = g_1026EB28 == 1 ? (PFN_AEA80_2)0x7c51e0 : (PFN_AEA80_2)0x7c51a0;
+	r1 = pfn1(e);
+	r2 = pfn2(r1, a2);
+	src = ((DWORD *)r1)[2];
+	memcpy(out, (char *)src + r2 * 0x40, 0x40);
+}
+
+// ---- aeb10 (rva 0xaeb10) ----
+extern "C" void *memcpy(void *, const void *, size_t);
+typedef int (__cdecl *PFN_AEB10_1)(void *);
+typedef int (__cdecl *PFN_AEB10_2)(int, int);
+extern DWORD g_1026EB28;
+struct ObjAEB10 {
+	char _p[0x2a4];
+	DWORD *m_p2A4;
+	void FUNC_100AEB10(void *src, int a2);
+};
+void ObjAEB10::FUNC_100AEB10(void *src, int a2)
+{
+	DWORD *s = m_p2A4;
+	void *e;
+	int r2;
+	PFN_AEB10_1 pfn1;
+	PFN_AEB10_2 pfn2;
+	int r1;
+	DWORD *dst;
+	if (!s || *s == 0x863c40) return;
+	e = (void *)s[6];
+	if (!e) return;
+	pfn1 = (PFN_AEB10_1)0x734a40;
+	pfn2 = g_1026EB28 == 1 ? (PFN_AEB10_2)0x7c51e0 : (PFN_AEB10_2)0x7c51a0;
+	r1 = pfn1(e);
+	r2 = pfn2(r1, a2);
+	dst = (DWORD *)(((DWORD *)r1)[2] + r2 * 0x40);
+	memcpy(dst, src, 0x40);
+	dst[3] &= 0xfffdfffc;
+}
+
+// ---- aecb0 (rva 0xaecb0) ----
+typedef int (__cdecl *PFN_AECB0)(void *);
+struct RecAECB0 { DWORD n; DWORD f[4]; };
+extern RecAECB0 g_tblAECB0[]; // 0x1011715c..0x1011724c
+struct ObjAECB0 {
+	char _p[0x2a4];
+	DWORD *m_p2A4;
+	void FUNC_100AECB0();
+};
+void ObjAECB0::FUNC_100AECB0()
+{
+	PFN_AECB0 pfn = (PFN_AECB0)0x734a40;
+	RecAECB0 *p = g_tblAECB0;
+	DWORD *s, *r, *slot;
+	void *e;
+	while (p < (RecAECB0 *)0x1011724c) {
+		s = m_p2A4;
+		if (s && *s != 0x863c40) {
+			e = (void *)s[6];
+			if (e) {
+				r = (DWORD *)pfn(e);
+				slot = (DWORD *)(r[8] + *((DWORD *)p - 1) * r[9] + 0x4c);
+				if (slot) {
+					slot[0] = p->f[0];
+					slot[1] = p->f[1];
+					slot[2] = p->f[2];
+					slot[3] = p->f[3];
+				}
+			}
+		}
+		p++;
+	}
+	s = m_p2A4;
+	if (s)
+		((void (__cdecl *)(DWORD *))0x532b20)(s);
+}
+
+// ---- aed60 (rva 0xaed60) ----
+extern "C" void *memset(void *, int, size_t);
+extern void FUNC_100B4970(float, float, float, float, float, float);
+struct ObjAED60 {
+	char _p[0x2a4];
+	DWORD *m_p2A4;
+	void FUNC_100AEA80(void *out, int a2);
+	void FUNC_100AED60();
+};
+void ObjAED60::FUNC_100AED60()
+{
+	float m[32];
+	DWORD *sub;
+	memset(&m[16], 0, 0x40);
+	memset(&m[0], 0, 0x40);
+	sub = m_p2A4;
+	FUNC_100AEA80(&m[16], ((DWORD **)sub)[0x122 + 5][5]);
+	FUNC_100AEA80(&m[0], ((DWORD **)sub)[0x122 + 6][5]);
+	FUNC_100B4970(m[12], m[13], m[14], m[28], m[29], m[30]);
+}
+
+// ---- af020 (rva 0xaf020) ----
+struct V_AF020 { float x, y, z; };
+struct DbgAF020 {
+	void FUNC_1006BC70();
+	void FUNC_1006BC80();
+	void FUNC_1006BC90(V_AF020 *, char *, int, int, int);
+};
+extern DbgAF020 *g_pDbgAF020;
+extern int FUNC_100C7353(char *buf, const char *fmt, ...);
+struct ObjAF020 {
+	char _p[0x2a4];
+	DWORD *m_p2A4;
+	void FUNC_100AEA80(void *out, int a2);
+	void FUNC_100AF020();
+};
+void ObjAF020::FUNC_100AF020()
+{
+	char buf[0x100];
+	V_AF020 v;
+	float m[16];
+	int i;
+	DWORD *sub, *e;
+	i = 1;
+	if (!g_pDbgAF020) return;
+	g_pDbgAF020->FUNC_1006BC70();
+	for (; i <= 0x12; i++) {
+		sub = m_p2A4;
+		e = ((DWORD **)sub)[i + 0x122];
+		FUNC_100AEA80(m, e[5]);
+		v.x = m[12];
+		v.y = m[13];
+		v.z = m[14];
+		FUNC_100C7353(buf, (const char *)0x100ea6ac, i);
+		g_pDbgAF020->FUNC_1006BC90(&v, buf, -1, 1, 0);
+	}
+	g_pDbgAF020->FUNC_1006BC80();
+}
+

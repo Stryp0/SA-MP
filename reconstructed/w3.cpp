@@ -576,3 +576,67 @@ void ObjA9560::FUNC_100A9560()
 	}
 }
 
+// ---- adb70 (rva 0xadb70) ----
+struct ObjADB70 {
+	char _p[0x2a4];
+	DWORD *m_p2A4;
+	char _q[0x2a];
+	DWORD *m_p2D2;
+	int m_i2D6;
+	int FUNC_100AD9C0();
+	void *FUNC_100ADB70(int idx);
+};
+extern int FUNC_100B4100(int w);
+extern BYTE g_tblADB70_0[]; // 0x10116f58
+extern BYTE g_tblADB70_2[]; // 0x10116e58
+extern BYTE g_tblADB70_3[]; // 0x10117058
+extern BYTE g_strADB70;
+void *ObjADB70::FUNC_100ADB70(int idx)
+{
+	if (m_p2D2) {
+		if (m_i2D6 >= 0 && m_i2D6 <= 2) {
+			if (!m_p2A4 || FUNC_100B4100(*(WORD *)((char *)m_p2A4 + 0x22)) != 5) {
+				if (FUNC_100AD9C0() != 0x16)
+					return g_tblADB70_0 + idx * 16;
+			}
+			return g_tblADB70_2 + idx * 16;
+		}
+		if (m_i2D6 == 3)
+			return g_tblADB70_3 + idx * 16;
+	}
+	return &g_strADB70;
+}
+
+// ---- aef90 (rva 0xaef90) ----
+struct V_AEF90 { float x, y, z; };
+struct DbgAEF90 {
+	void FUNC_1006BC70();
+	void FUNC_1006BC80();
+	void FUNC_1006BC90(V_AEF90 *, char *, int, int, int);
+};
+extern DbgAEF90 *g_pDbgAEF90;
+extern int FUNC_100C7353(char *buf, const char *fmt, ...);
+struct ObjAEF90 {
+	void FUNC_100AEA80(void *out, int a2);
+	void FUNC_100AEF90();
+};
+void ObjAEF90::FUNC_100AEF90()
+{
+	char buf[0x100];
+	V_AEF90 v;
+	float m[16];
+	int i;
+	i = 0;
+	if (!g_pDbgAEF90) return;
+	g_pDbgAEF90->FUNC_1006BC70();
+	for (; i != 0x40; i++) {
+		FUNC_100AEA80(m, i);
+		v.x = m[12];
+		v.y = m[13];
+		v.z = m[14];
+		FUNC_100C7353(buf, (const char *)0x100ea6ac, i);
+		g_pDbgAEF90->FUNC_1006BC90(&v, buf, -1, 1, 0);
+	}
+	g_pDbgAEF90->FUNC_1006BC80();
+}
+
